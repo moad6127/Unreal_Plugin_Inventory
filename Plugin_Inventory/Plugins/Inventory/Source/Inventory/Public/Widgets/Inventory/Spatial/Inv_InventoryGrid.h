@@ -12,6 +12,8 @@
  */
 class UInv_GridSlot;
 class UCanvasPanel;
+class UInv_InventoryComponent;
+class UInv_InventoryItem;
 
 UCLASS()
 class INVENTORY_API UInv_InventoryGrid : public UUserWidget
@@ -21,9 +23,16 @@ public:
 	EInv_ItemCategory GetItemCategory() const { return ItemCategory; }
 
 	virtual void NativeOnInitialized() override;
+
+	UFUNCTION()
+	void AddItem(UInv_InventoryItem* Item);
 private:
 
 	void ConstructGrid();
+
+	bool MatchesCategory(const UInv_InventoryItem* Item) const;
+
+	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UCanvasPanel> CanvasPanel;

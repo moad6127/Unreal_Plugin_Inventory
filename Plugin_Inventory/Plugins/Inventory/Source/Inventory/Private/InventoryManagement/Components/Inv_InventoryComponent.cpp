@@ -4,11 +4,22 @@
 #include "InventoryManagement/Components/Inv_InventoryComponent.h"
 #include "Widgets/Inventory/InventoryBase/Inv_InventoryBase.h"
 #include "Types/Inv_GridTypes.h"
+#include "Net/UnrealNetwork.h"
 
-UInv_InventoryComponent::UInv_InventoryComponent()
+UInv_InventoryComponent::UInv_InventoryComponent() : InventoryList(this)
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
+	SetIsReplicatedByDefault(true);
+	bReplicateUsingRegisteredSubObjectList = true;
+
+}
+
+void UInv_InventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, InventoryList);
 }
 
 void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
@@ -21,7 +32,16 @@ void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 		return;
 	}
 
-
+	if (Result.Item.IsValid() && Result.bStackable)
+	{
+		//이미 스택가능한 아이템이 존재, 스택수만 조정
+		Server_AddStacksToItem(ItemComponent, Result.TotalRoomToFill, Result.Remainder);
+	}
+	else if (Result.TotalRoomToFill > 0)
+	{
+		//인벤토리에 해당 아이템이 없음,인벤토리에 아이템 생성
+		Server_AddNewItem(ItemComponent, Result.bStackable ? Result.TotalRoomToFill : 0);
+	}
 }
 
 void UInv_InventoryComponent::ToggleInventoryMenu()
@@ -36,7 +56,29 @@ void UInv_InventoryComponent::ToggleInventoryMenu()
 	}
 }
 
+void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount)
+{
+	UInv_InventoryItem* NewItem = InventoryList.AddEntry(ItemComponent);
+	if (GetOwner()->GetNetMode() == NM_ListenServer || GetOwner()->GetNetMode() == NM_Standalone)
+	{
+		OnItemAdded.Broadcast(NewItem);
+	}
 
+	//TODO : ItemComponent가 OwningActor를 파괴하도록 만들기
+}
+
+void UInv_InventoryComponent::Server_AddStacksToItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount, int32 Remainder)
+{
+	
+}
+
+void UInv_InventoryComponent::AddRepSubObj(UObject* SubObj)
+{
+	if (IsUsingRegisteredSubObjectList() && IsReadyForReplication() && IsValid(SubObj))
+	{
+		AddReplicatedSubObject(SubObj);
+	}
+}
 
 void UInv_InventoryComponent::BeginPlay()
 {

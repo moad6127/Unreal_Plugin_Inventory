@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "InventoryManagement/FastArray/Inv_FastArray.h"
 #include "Inv_InventoryComponent.generated.h"
 
 class UInv_InventoryBase;
@@ -20,12 +21,21 @@ class INVENTORY_API UInv_InventoryComponent : public UActorComponent
 
 public:	
 	UInv_InventoryComponent();
+	virtual void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty >& OutLifetimeProps) const override;
+
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
 	void TryAddItem(UInv_ItemComponent* ItemComponent);
 
 	void ToggleInventoryMenu();
+
+	UFUNCTION(Server,Reliable)
+	void Server_AddNewItem(UInv_ItemComponent* ItemComponent, int32 StackCount);
 	
+	UFUNCTION(Server, Reliable)
+	void Server_AddStacksToItem(UInv_ItemComponent* ItemComponent, int32 StackCount, int32 Remainder);
+
+	void AddRepSubObj(UObject* SubObj);
 
 	FInventoryItemChange OnItemAdded;
 	FInventoryItemChange OnItemRemoved;
@@ -42,13 +52,16 @@ private:
 
 	TWeakObjectPtr<APlayerController> OwningController;
 
+	UPROPERTY(Replicated)
+	FInv_InventoryFastArray InventoryList;
+
 	UPROPERTY()
 	TObjectPtr<UInv_InventoryBase> InventoryMenu;
 
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	TSubclassOf<UInv_InventoryBase> InventoryMenuClass;
 
-	bool bInventoryMenuOpen;
+	bool bInventoryMenuOpen = false;
 	
 	
 };
