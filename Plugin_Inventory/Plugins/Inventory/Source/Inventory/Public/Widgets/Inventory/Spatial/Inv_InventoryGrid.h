@@ -14,23 +14,29 @@ class UInv_GridSlot;
 class UCanvasPanel;
 class UInv_InventoryComponent;
 class UInv_InventoryItem;
+class UInv_ItemComponent;
+struct FInv_ItemManifest;
 
 UCLASS()
 class INVENTORY_API UInv_InventoryGrid : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	EInv_ItemCategory GetItemCategory() const { return ItemCategory; }
-
 	virtual void NativeOnInitialized() override;
+
+	EInv_ItemCategory GetItemCategory() const { return ItemCategory; }
+	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_ItemComponent* ItemCompoennt);
 
 	UFUNCTION()
 	void AddItem(UInv_InventoryItem* Item);
 private:
 
 	void ConstructGrid();
+	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_InventoryItem* Item);
+	FInv_SlotAvailabilityResult HasRoomForItem(const FInv_ItemManifest& Manifest);
 
 	bool MatchesCategory(const UInv_InventoryItem* Item) const;
+	void AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem);
 
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
 

@@ -10,6 +10,10 @@
 #include "InventoryManagement/Components/Inv_InventoryComponent.h"
 #include "InventoryManagement/Utils/Inv_InventoryStatics.h"
 #include "Items/Inv_InventoryItem.h"
+#include "Items/Components/Inv_ItemComponent.h"
+#include "Items/Manifest/Inv_ItemManifest.h"
+#include "Items/Fragments/Inv_ItemFragment.h"
+#include "Items/Fragments/Inv_FragmentTags.h"
 
 void UInv_InventoryGrid::NativeOnInitialized()
 {
@@ -20,13 +24,49 @@ void UInv_InventoryGrid::NativeOnInitialized()
 	InventoryComponent->OnItemAdded.AddDynamic(this, &UInv_InventoryGrid::AddItem);
 }
 
+FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_ItemComponent* ItemCompoennt)
+{
+	return HasRoomForItem(ItemCompoennt->GetItemManifest());
+}
+
+FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_InventoryItem* Item)
+{
+	return HasRoomForItem(Item->GetItemManifest());
+}
+
+FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemManifest& Manifest)
+{
+	FInv_SlotAvailabilityResult Result;
+	Result.TotalRoomToFill = 1;
+
+	FInv_SlotAvailability SlotAvailability;
+	SlotAvailability.AmountToFill = 1;
+	SlotAvailability.Index = 0;
+
+	Result.SlotAvailabilities.Add(MoveTemp(SlotAvailability));
+
+	return Result;
+}
+
 void UInv_InventoryGrid::AddItem(UInv_InventoryItem* Item)
 {
 	if (!MatchesCategory(Item))
 	{
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("InventoryGrid::AddItem"));
+	FInv_SlotAvailabilityResult Result = HasRoomForItem(Item);
+	AddItemToIndices(Result, Item);
+}
+
+void UInv_InventoryGrid::AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem)
+{
+	const FInv_GridFragment* GridFragment = GetFragment<FInv_GridFragment>(NewItem, FragmentTags::GridFragment);
+	const FInv_ImageFragment* ImageFragment = GetFragment<FInv_ImageFragment>(NewItem, FragmentTags::IconFragment);
+	if (!GridFragment || !ImageFragment)
+	{
+		return;
+	}
+
 }
 
 void UInv_InventoryGrid::ConstructGrid()
@@ -52,7 +92,10 @@ void UInv_InventoryGrid::ConstructGrid()
 	}
 }
 
+
+
 bool UInv_InventoryGrid::MatchesCategory(const UInv_InventoryItem* Item) const
 {
 	return Item->GetItemManifest().GetItemCategory() == ItemCategory;
 }
+
