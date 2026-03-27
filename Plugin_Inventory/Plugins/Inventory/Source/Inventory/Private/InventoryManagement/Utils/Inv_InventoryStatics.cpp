@@ -6,6 +6,7 @@
 #include "Items/Components/Inv_ItemComponent.h"
 
 
+
 UInv_InventoryComponent* UInv_InventoryStatics::GetInventoryComponent(const APlayerController* PlayerController)
 {
 	if (!IsValid(PlayerController))
