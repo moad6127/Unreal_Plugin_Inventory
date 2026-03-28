@@ -38,21 +38,110 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_Invent
 FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemManifest& Manifest)
 {
 	FInv_SlotAvailabilityResult Result;
-	Result.TotalRoomToFill = 7;
-	Result.bStackable = true;
 
-	FInv_SlotAvailability SlotAvailability;
-	SlotAvailability.AmountToFill = 2;
-	SlotAvailability.Index = 0;
-	Result.SlotAvailabilities.Add(MoveTemp(SlotAvailability));
+	// Determine if the item is stackable
+	//항목을 쌓을 수 있는지 확인
+	const FInv_StackableFragment* StackableFragment = Manifest.GetFragmentOfType<FInv_StackableFragment>();
+	Result.bStackable = StackableFragment != nullptr;
 
-	FInv_SlotAvailability SlotAvailability2;
-	SlotAvailability2.AmountToFill = 5;
-	SlotAvailability2.Index = 1;
-	Result.SlotAvailabilities.Add(MoveTemp(SlotAvailability2));
+	//Determine how may stacks to add.
+	//얼마나 stack을 할지 확인
+	const int32 MaxStackSize = StackableFragment ? StackableFragment->GetMaxStackSize() : 1;
+	int32 AmountToFill = StackableFragment ? StackableFragment->GetStackCount() : 1;
+
+	TSet<int32> CheckedIndices;
+	//For each Grid Slot
+	//각각의 GridSlot이 다음 조건을 만족하는지 확인
+	for (const auto& GridSlot : GridSlots)
+	{
+		//if we don't have anymore to fill, break out of the loop early.
+		// 채울필요가 없다면 반복문 탈출
+		if (AmountToFill == 0)
+		{
+			break;
+		}
+		//if this index claimed yet?
+		// index가 사용되고 있는지 확인
+		if (IsIndexClaimed(CheckedIndices,GridSlot->GetTileIndex()))
+		{
+			continue;
+		}
+		//can the item fit here?
+		// 아이템 들어갈수 있는지 확인, 범위를 나가는지 확인
+		TSet<int32> TentativelyClaimed;
+		if (!HasRoomAtIndex(GridSlot,GetItemDimensions(Manifest),CheckedIndices,TentativelyClaimed))
+		{
+			continue;
+		}
+
+		CheckedIndices.Append(TentativelyClaimed);
+
+
+		// how much to fill?
+		// 얼마나 채우나?
+		// update the amount left to fill
+		// 왼쪽부터 최신화 하기
+	}
+
+
+	//how much is the Remainder
+	//나머지는 어느정도인지 확인
+
 
 
 	return Result;
+}
+
+bool UInv_InventoryGrid::IsIndexClaimed(const TSet<int32>& CheckIndices, const int32 Index) const
+{
+	return CheckIndices.Contains(Index);
+}
+
+bool UInv_InventoryGrid::HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIntPoint& Dimensions, const TSet<int32>& CheckedIndices, TSet<int32>& OutTentativelyClaimed)
+{
+	//is ther room at this index? 
+	// 다른 아이템이 있는지 확인
+
+	bool bHasRoomAtIndex = true;
+
+	UInv_InventoryStatics::ForEach2D(GridSlots, GridSlot->GetTileIndex(), Dimensions, Columns,
+		[&](const UInv_GridSlot* SubGridSlot)
+		{
+			if (CheckSlotConstraints(SubGridSlot))
+			{
+				OutTentativelyClaimed.Add(SubGridSlot->GetTileIndex());
+			}
+			else
+			{
+				bHasRoomAtIndex = false;
+			}
+		});
+
+	return bHasRoomAtIndex;
+}
+
+bool UInv_InventoryGrid::CheckSlotConstraints(const UInv_GridSlot* SubGridSlot) const
+{
+	//check any other important conditions 
+	// item claimdd?
+	// index가 사용중인가?
+	// has vaild item?
+	// 	item 이 존재하는가?
+	// is this item same type as the item we're trying to add?
+	// 같은타입의 아이템이 있는데 추가하려고 하는가?
+	// if so, is this a stackable item?
+	// 	그렇다면 그아이템은 stackable아이템인가?
+	// if stackable, is this slot at the max stack size already?
+	// stackable아이템을때 이미 stack전부가 채워져있나?
+
+	return false;
+}
+
+FIntPoint UInv_InventoryGrid::GetItemDimensions(const FInv_ItemManifest& Manifest) const
+{
+	const FInv_GridFragment* GridFragment = Manifest.GetFragmentOfType<FInv_GridFragment>();
+	return GridFragment ? GridFragment->GetGridSize() : FIntPoint(1, 1);
+
 }
 
 void UInv_InventoryGrid::AddItem(UInv_InventoryItem* Item)
@@ -140,6 +229,8 @@ void UInv_InventoryGrid::UpdateGridSlot(UInv_InventoryItem* NewItem, const int32
 			GridSlot->SetAvailable(false);
 		});
 }
+
+
 
 void UInv_InventoryGrid::SetSlottedItemImage(const UInv_SlottedItem* SlottedItem, const FInv_GridFragment* GridFragment, const FInv_ImageFragment* ImageFragment)
 {
