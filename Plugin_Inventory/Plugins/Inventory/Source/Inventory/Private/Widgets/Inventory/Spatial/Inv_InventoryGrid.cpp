@@ -66,28 +66,52 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 		{
 			continue;
 		}
+		//Is the item in grid bounds?
+		// 범위를 나가는지 확인
+		if (!IsInGridBounds(GridSlot->GetTileIndex(), GetItemDimensions(Manifest)))
+		{
+			continue;
+		}
+
 		//can the item fit here?
-		// 아이템 들어갈수 있는지 확인, 범위를 나가는지 확인
+		// 아이템 들어갈수 있는지 확인
 		TSet<int32> TentativelyClaimed;
-		if (!HasRoomAtIndex(GridSlot,GetItemDimensions(Manifest),CheckedIndices,TentativelyClaimed))
+		if (!HasRoomAtIndex(GridSlot,GetItemDimensions(Manifest),CheckedIndices,TentativelyClaimed,Manifest.GetItemType(),MaxStackSize))
+		{
+			continue;
+		}
+		// how much to fill?
+		// 얼마나 채우나?
+
+		const int32 AmountToFillInSlot = DetermineFillAmountForSlot(Result.bStackable, MaxStackSize, AmountToFill, GridSlot);
+		if (AmountToFillInSlot == 0)
 		{
 			continue;
 		}
 
 		CheckedIndices.Append(TentativelyClaimed);
 
-
-		// how much to fill?
-		// 얼마나 채우나?
 		// update the amount left to fill
 		// 왼쪽부터 최신화 하기
+		Result.TotalRoomToFill += AmountToFillInSlot;
+		Result.SlotAvailabilities.Emplace(
+			FInv_SlotAvailability{
+				HasValidItem(GridSlot) ? GridSlot->GetUpperLeftIndex() : GridSlot->GetTileIndex(),
+				Result.bStackable ? AmountToFillInSlot : 0,
+				HasValidItem(GridSlot)
+			}
+		);
+
+		AmountToFill -= AmountToFillInSlot;
+
+		//how much is the Remainder
+		//나머지는 어느정도인지 확인
+		Result.Remainder = AmountToFill;
+		if (AmountToFill == 0)
+		{
+			return Result;
+		}
 	}
-
-
-	//how much is the Remainder
-	//나머지는 어느정도인지 확인
-
-
 
 	return Result;
 }
@@ -97,7 +121,7 @@ bool UInv_InventoryGrid::IsIndexClaimed(const TSet<int32>& CheckIndices, const i
 	return CheckIndices.Contains(Index);
 }
 
-bool UInv_InventoryGrid::HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIntPoint& Dimensions, const TSet<int32>& CheckedIndices, TSet<int32>& OutTentativelyClaimed)
+bool UInv_InventoryGrid::HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIntPoint& Dimensions, const TSet<int32>& CheckedIndices, TSet<int32>& OutTentativelyClaimed, const FGameplayTag& ItemType, const int32 MaxStackSize)
 {
 	//is ther room at this index? 
 	// 다른 아이템이 있는지 확인
@@ -107,7 +131,7 @@ bool UInv_InventoryGrid::HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIn
 	UInv_InventoryStatics::ForEach2D(GridSlots, GridSlot->GetTileIndex(), Dimensions, Columns,
 		[&](const UInv_GridSlot* SubGridSlot)
 		{
-			if (CheckSlotConstraints(SubGridSlot))
+			if (CheckSlotConstraints(GridSlot,SubGridSlot,CheckedIndices,ItemType,MaxStackSize))
 			{
 				OutTentativelyClaimed.Add(SubGridSlot->GetTileIndex());
 			}
@@ -120,21 +144,77 @@ bool UInv_InventoryGrid::HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIn
 	return bHasRoomAtIndex;
 }
 
-bool UInv_InventoryGrid::CheckSlotConstraints(const UInv_GridSlot* SubGridSlot) const
+bool UInv_InventoryGrid::CheckSlotConstraints(const UInv_GridSlot* GridSlot, const UInv_GridSlot* SubGridSlot, const TSet<int32>& CheckedIndices, const FGameplayTag& ItemType, const int32 MaxStackSize) const
 {
-	//check any other important conditions 
 	// item claimdd?
 	// index가 사용중인가?
+	if (IsIndexClaimed(CheckedIndices,SubGridSlot->GetTileIndex()))
+	{
+		return false;
+	}
+
 	// has vaild item?
 	// 	item 이 존재하는가?
+	if (!HasValidItem(SubGridSlot))
+	{
+
+		return true;
+	}
+
+	//Is this Grid slot an upper left slot?
+	//해당 GridSlot이 UpperLeft인가?
+	if (!IsUpperLeftSlot(GridSlot, SubGridSlot))
+	{
+		return false;
+	}
+	//  is this a stackable item?
+	// 그아이템은 stackable아이템인가?
+	UInv_InventoryItem* SubItem = SubGridSlot->GetInventoryItem().Get();
+	if (!SubItem->IsStackable())
+	{
+		return false;
+	}
+
 	// is this item same type as the item we're trying to add?
 	// 같은타입의 아이템이 있는데 추가하려고 하는가?
-	// if so, is this a stackable item?
-	// 	그렇다면 그아이템은 stackable아이템인가?
+	if (!DoesItemTypeMatch(SubItem, ItemType))
+	{
+		return false;
+	}
 	// if stackable, is this slot at the max stack size already?
 	// stackable아이템을때 이미 stack전부가 채워져있나?
+	if (GridSlot->GetStackCount() >= MaxStackSize)
+	{
+		return false;
+	}
 
-	return false;
+	return true;
+}
+
+bool UInv_InventoryGrid::HasValidItem(const UInv_GridSlot* GridSlot) const
+{
+	return GridSlot->GetInventoryItem().IsValid();
+}
+
+bool UInv_InventoryGrid::IsUpperLeftSlot(const UInv_GridSlot* GridSlot, const UInv_GridSlot* SubGridSlot) const
+{
+	return SubGridSlot->GetUpperLeftIndex() == GridSlot->GetTileIndex();
+}
+
+bool UInv_InventoryGrid::DoesItemTypeMatch(const UInv_InventoryItem* SubItem, const FGameplayTag& ItemType) const
+{
+	return SubItem->GetItemManifest().GetItemType().MatchesTagExact(ItemType);
+}
+
+bool UInv_InventoryGrid::IsInGridBounds(const int32 StartIndex, const FIntPoint& ItemDimensions) const 
+{
+	if (StartIndex < 0 || StartIndex >= GridSlots.Num())
+	{
+		return false;
+	}
+	const int32 EndColumn = (StartIndex % Columns) + ItemDimensions.X;
+	const int32 EndRow = (StartIndex / Columns) + ItemDimensions.Y;
+	return EndColumn <= Columns && EndRow <= Rows;
 }
 
 FIntPoint UInv_InventoryGrid::GetItemDimensions(const FInv_ItemManifest& Manifest) const
@@ -142,6 +222,26 @@ FIntPoint UInv_InventoryGrid::GetItemDimensions(const FInv_ItemManifest& Manifes
 	const FInv_GridFragment* GridFragment = Manifest.GetFragmentOfType<FInv_GridFragment>();
 	return GridFragment ? GridFragment->GetGridSize() : FIntPoint(1, 1);
 
+}
+
+int32 UInv_InventoryGrid::DetermineFillAmountForSlot(const bool bStackable, const int32 MaxStackSize, const int32 AmountToFill, const UInv_GridSlot* GridSlot) const
+{
+	//슬롯에 들어갈수 있는 양 계산
+	const int32 RoomInSlot = MaxStackSize - GetStackAmount(GridSlot);
+
+	//AmountToFill과 슬롯에 들어갈수 있는 양 사이에서 최소값을 넣기
+	return bStackable ? FMath::Min(AmountToFill, RoomInSlot) : 1;
+}
+
+int32 UInv_InventoryGrid::GetStackAmount(const UInv_GridSlot* GridSlot) const
+{
+	int32 CurrentSlotStackCount = GridSlot->GetStackCount();
+	if (const int32 UpperLeftIndex = GridSlot->GetUpperLeftIndex(); UpperLeftIndex != INDEX_NONE)
+	{
+		UInv_GridSlot* UpperLeftGridSlot = GridSlots[UpperLeftIndex];
+		CurrentSlotStackCount = UpperLeftGridSlot->GetStackCount();
+	}
+	return CurrentSlotStackCount;
 }
 
 void UInv_InventoryGrid::AddItem(UInv_InventoryItem* Item)

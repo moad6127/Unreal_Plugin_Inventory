@@ -5,6 +5,8 @@
 #include "Widgets/Inventory/InventoryBase/Inv_InventoryBase.h"
 #include "Types/Inv_GridTypes.h"
 #include "Net/UnrealNetwork.h"
+#include "Items/Components/Inv_ItemComponent.h"
+#include "Items/Inv_InventoryItem.h"
 
 UInv_InventoryComponent::UInv_InventoryComponent() : InventoryList(this)
 {
@@ -25,6 +27,8 @@ void UInv_InventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 {
 	FInv_SlotAvailabilityResult Result = InventoryMenu->HasRoomForItem(ItemComponent);
+	UInv_InventoryItem* FoundItem = InventoryList.FindFirstItemByType(ItemComponent->GetItemManifest().GetItemType());
+	Result.Item = FoundItem;
 
 	if (Result.TotalRoomToFill == 0)
 	{
