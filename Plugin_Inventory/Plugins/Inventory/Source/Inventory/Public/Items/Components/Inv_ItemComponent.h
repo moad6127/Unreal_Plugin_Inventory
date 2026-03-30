@@ -20,7 +20,14 @@ public:
 	FInv_ItemManifest GetItemManifest() const { return ItemManifest; }
 
 	FString GetPickupMessage() const { return PickupMessage; }
+	void PickedUp();
 protected:
+
+	// Pickup함수와 같이 호출된다.
+	// 블루프린트에서 추가적으로 수행해야 할것이 있다면 해당 함수를 사용한다.
+	// (나이아가라, 사운드 등등)
+	UFUNCTION(BlueprintImplementableEvent, Category = "Inventory")
+	void OnPickedUP();
 
 private:
 	UPROPERTY(Replicated, EditAnywhere, Category = "Inventory")
