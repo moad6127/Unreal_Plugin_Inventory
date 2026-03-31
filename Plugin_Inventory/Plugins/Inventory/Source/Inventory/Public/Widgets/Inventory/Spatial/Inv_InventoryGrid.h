@@ -20,6 +20,7 @@ class UInv_SlottedItem;
 struct FInv_GridFragment;
 struct FInv_ImageFragment;
 struct FGameplayTag;
+class UInv_HoverItem;
 
 UCLASS()
 class INVENTORY_API UInv_InventoryGrid : public UUserWidget
@@ -57,10 +58,18 @@ private:
 	FIntPoint GetItemDimensions(const FInv_ItemManifest& Manifest) const;
 	int32 DetermineFillAmountForSlot(const bool bStackable, const int32 MaxStackSize, const int32 AmountToFill, const UInv_GridSlot* GridSlot) const;
 	int32 GetStackAmount(const UInv_GridSlot* GridSlot) const;
-
+	bool IsRightClick(const FPointerEvent& MouseEvent) const;
+	bool IsLeftClick(const FPointerEvent& MouseEvent)const;
+	void PickUp(UInv_InventoryItem* ClickedInventoryItem, const int32 GridIndex);
+	void AssignHoverItem(UInv_InventoryItem* InventoryItem);
+	void AssignHoverItem(UInv_InventoryItem* InventoryItem,const int32 GridIndex, const int32 PreviousGridIndex);
+	void RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, const int32 GridIndex);
 
 	UFUNCTION()
 	void AddStacks(const FInv_SlotAvailabilityResult& Result);
+
+	UFUNCTION()
+	void OnSlottedItemClied(int32 GridIndex, const FPointerEvent& MouseEvent);
 	
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
 
@@ -91,7 +100,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	float TileSize;
 
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	TSubclassOf<UInv_HoverItem> HoverItemClass;
 
-
-
+	UPROPERTY()
+	TObjectPtr<UInv_HoverItem> HoverItem;
 };
