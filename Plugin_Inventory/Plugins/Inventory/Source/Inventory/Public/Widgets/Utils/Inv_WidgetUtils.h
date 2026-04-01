@@ -9,6 +9,8 @@
 /**
  * 
  */
+class UWidget;
+
 UCLASS()
 class INVENTORY_API UInv_WidgetUtils : public UBlueprintFunctionLibrary
 {
@@ -16,6 +18,10 @@ class INVENTORY_API UInv_WidgetUtils : public UBlueprintFunctionLibrary
 	
 public:
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	static FVector2D GetWidgetPosision(UWidget* Widget);
+
 	static int32 GetIndexFromPosition(const FIntPoint& Position, const int32 Columns);
 	static FIntPoint GetPositionFromIndex(const int32 Index, const int32 Columns);
+
 };
