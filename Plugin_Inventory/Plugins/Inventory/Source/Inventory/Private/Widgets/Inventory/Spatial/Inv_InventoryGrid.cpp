@@ -37,11 +37,33 @@ void UInv_InventoryGrid::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
 	const FVector2D CanvasPosition = UInv_WidgetUtils::GetWidgetPosision(CanvasPanel);
 	const FVector2D MousePosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetOwningPlayer());
 
+	if (CursorExitedCanvas(CanvasPosition, UInv_WidgetUtils::GetWidgetSize(CanvasPanel), MousePosition))
+	{
+		return;
+	}
+
 	UpdateTileParameters(CanvasPosition, MousePosition);
+}
+
+bool UInv_InventoryGrid::CursorExitedCanvas(const FVector2D& BoundaryPos, const FVector2D& BoundarySize, const FVector2D& Location)
+{
+	bLastMouseWithinCanvas = bMouseWithinCanvas;
+	bMouseWithinCanvas = UInv_WidgetUtils::IsWithinBound(BoundaryPos, BoundarySize, Location);
+	if (!bMouseWithinCanvas && bLastMouseWithinCanvas)
+	{
+		UnHighlightSlot(LastHighlightedIndex, LastHighlightedDimensions);
+		return true;
+	}
+	return false;
 }
 
 void UInv_InventoryGrid::UpdateTileParameters(const FVector2D CanvasPosition, const FVector2D MousePosition)
 {
+	if (!bMouseWithinCanvas)
+	{
+		return;
+	}
+
 	const FIntPoint HoveredTileCoordinates = CalculateHoveredCoordinates(CanvasPosition, MousePosition);
 	LastTIleParameters = TileParameters;
 	TileParameters.TileCoordinates = HoveredTileCoordinates;
@@ -60,9 +82,132 @@ void UInv_InventoryGrid::OnTileParametersUpdate(const FInv_TileParameters& Param
 
 	//Hovered Item의 Dimension을 가져오기.
 	const FIntPoint Dimensions = HoverItem->GetGridDemensions();
+	
 	//타일 Highlight를 위해 시작 좌표 계산하기.
 	const FIntPoint StartingCoordinate = CalculateStartingCoordinates(Parameters.TileCoordinates, Dimensions, Parameters.TileQuadrant);
+	ItemDropIndex = UInv_WidgetUtils::GetIndexFromPosition(StartingCoordinate, Columns);
 
+	CurrentQueryResult = CheckHoverPosition(StartingCoordinate, Dimensions);
+
+	if (CurrentQueryResult.bHasSpace)
+	{
+		HighlightSlot(ItemDropIndex, Dimensions);
+		return;
+	}
+	UnHighlightSlot(LastHighlightedIndex, LastHighlightedDimensions);
+	
+	if (CurrentQueryResult.ValidItem.IsValid() && GridSlots.IsValidIndex(CurrentQueryResult.UpperLeftIndex))
+	{
+		const FInv_GridFragment* GridFragment = GetFragment<FInv_GridFragment>(CurrentQueryResult.ValidItem.Get(), FragmentTags::GridFragment);
+		if (!GridFragment)
+		{
+			return;
+		}
+		ChangeHoverType(CurrentQueryResult.UpperLeftIndex, GridFragment->GetGridSize(), EInv_GridSlotState::GrayedOut);
+	}
+
+}
+
+FInv_SpaceQueryResult UInv_InventoryGrid::CheckHoverPosition(const FIntPoint& Position, const FIntPoint& Dimensions)
+{
+	//Hover Position의 다음사항확인
+	FInv_SpaceQueryResult Result;
+
+	// Gird범위내에 있는지
+	if (!IsInGridBounds(UInv_WidgetUtils::GetIndexFromPosition(Position, Columns), Dimensions))
+	{
+		return Result;
+	}
+	Result.bHasSpace = true;
+	// 범위내의 다른 아이템이 존재하는지()
+	// 동일한 아이템의 많은 index가 있을경오 모두 UpperLeftIndex가 같은지 확인한다.
+	// UpperIndex가 같을경우 같은 아이템이다.
+	TSet<int32> OccupiedUpperLeftIndices;
+	UInv_InventoryStatics::ForEach2D(GridSlots, UInv_WidgetUtils::GetIndexFromPosition(Position, Columns), Dimensions, Columns,
+		[&](const UInv_GridSlot* GridSlot)
+		{
+			if (GridSlot->GetInventoryItem().IsValid())
+			{
+				OccupiedUpperLeftIndices.Add(GridSlot->GetUpperLeftIndex());
+				Result.bHasSpace = false;
+				if (OccupiedUpperLeftIndices.Num() > 1)
+				{
+					return;
+				}
+			}
+		});
+
+	// 만약 범위내에 다른아이템이 존재하면 Swap할수 있는가?(범위내애 1개아이템만 존재해서,)
+	//OccupiedUpperLeftIndices가 단한개일경우 swap가능하지만 여러개일경우 Swap불가능
+	if (OccupiedUpperLeftIndices.Num() == 1)
+	{
+		const int32 Index = *OccupiedUpperLeftIndices.CreateConstIterator();
+		Result.ValidItem = GridSlots[Index]->GetInventoryItem();
+		Result.UpperLeftIndex = GridSlots[Index]->GetUpperLeftIndex();
+	}
+
+
+
+	return Result;
+}
+
+void UInv_InventoryGrid::HighlightSlot(const int32 Index, const FIntPoint& Dimensions)
+{
+	if (!bMouseWithinCanvas)
+	{
+		return;
+	}
+
+	UnHighlightSlot(LastHighlightedIndex, LastHighlightedDimensions);
+	UInv_InventoryStatics::ForEach2D(GridSlots, Index, Dimensions, Columns, [&](UInv_GridSlot* GridSlot)
+		{
+			GridSlot->SetOccupiedTexture();
+		});
+	LastHighlightedDimensions = Dimensions;
+	LastHighlightedIndex = Index;
+}
+
+void UInv_InventoryGrid::UnHighlightSlot(const int32 Index, const FIntPoint& Dimensions)
+{
+	UInv_InventoryStatics::ForEach2D(GridSlots, Index, Dimensions, Columns, [&](UInv_GridSlot* GridSlot)
+		{
+			if (GridSlot->IsAvailable())
+			{
+				GridSlot->SetUnoccupiedTexture();
+			}
+			else
+			{
+				GridSlot->SetOccupiedTexture();
+			}
+		});
+}
+
+void UInv_InventoryGrid::ChangeHoverType(const int32 Index, const FIntPoint& Dimensions, EInv_GridSlotState GridSlotState)
+{
+	UnHighlightSlot(LastHighlightedIndex, LastHighlightedDimensions);
+	UInv_InventoryStatics::ForEach2D(GridSlots, Index, Dimensions, Columns, [State = GridSlotState](UInv_GridSlot* GridSlot)
+		{
+			switch (State)
+			{
+			case EInv_GridSlotState::Unoccupied:
+				GridSlot->SetUnoccupiedTexture();
+				break;
+			case EInv_GridSlotState::Occupied:
+				GridSlot->SetOccupiedTexture();
+				break;
+			case EInv_GridSlotState::Selected:
+				GridSlot->SetSelectedTexture();
+				break;
+			case EInv_GridSlotState::GrayedOut:
+				GridSlot->SetGrayedOutTexture();
+				break;
+			default:
+				break;
+			}
+		});
+
+	LastHighlightedIndex = Index;
+	LastHighlightedDimensions = Dimensions;
 }
 
 FIntPoint UInv_InventoryGrid::CalculateStartingCoordinates(const FIntPoint& Coordinate, const FIntPoint& Dimensions, const EInv_TileQuadrant Quadrant) const
@@ -96,6 +241,7 @@ FIntPoint UInv_InventoryGrid::CalculateStartingCoordinates(const FIntPoint& Coor
 	}
 	return StartingCoord;
 }
+
 
 FIntPoint UInv_InventoryGrid::CalculateHoveredCoordinates(const FVector2D& CanvasPosition, const FVector2D MousePosition) const
 {

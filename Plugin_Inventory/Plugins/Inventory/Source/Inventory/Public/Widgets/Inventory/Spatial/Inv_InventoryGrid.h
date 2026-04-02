@@ -21,6 +21,8 @@ struct FInv_GridFragment;
 struct FInv_ImageFragment;
 struct FGameplayTag;
 class UInv_HoverItem;
+enum class EInv_GridSlotState : uint8;
+
 
 UCLASS()
 class INVENTORY_API UInv_InventoryGrid : public UUserWidget
@@ -66,11 +68,16 @@ private:
 	void AssignHoverItem(UInv_InventoryItem* InventoryItem,const int32 GridIndex, const int32 PreviousGridIndex);
 	void RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, const int32 GridIndex);
 
+	bool CursorExitedCanvas(const FVector2D& BoundaryPos, const FVector2D& BoundarySize, const FVector2D& Location);
 	void UpdateTileParameters(const FVector2D CanvasPosition, const FVector2D MousePosition);
 	FIntPoint CalculateHoveredCoordinates(const FVector2D& CanvasPosition, const FVector2D MousePosition) const;
 	EInv_TileQuadrant CalculateTileQuadrant(const FVector2D& CanvasPosition, const FVector2D MousePosition) const;
 	void OnTileParametersUpdate(const FInv_TileParameters& Parameters);
 	FIntPoint CalculateStartingCoordinates(const FIntPoint& Coordinate, const FIntPoint& Dimensions, const EInv_TileQuadrant Quadrant) const;
+	FInv_SpaceQueryResult CheckHoverPosition(const FIntPoint& Position, const FIntPoint& Dimensions);
+	void HighlightSlot(const int32 Index, const FIntPoint& Dimensions);
+	void UnHighlightSlot(const int32 Index, const FIntPoint& Dimensions);
+	void ChangeHoverType(const int32 Index, const FIntPoint& Dimensions, EInv_GridSlotState GridSlotState);
 
 	UFUNCTION()
 	void AddStacks(const FInv_SlotAvailabilityResult& Result);
@@ -115,4 +122,15 @@ private:
 
 	FInv_TileParameters TileParameters;
 	FInv_TileParameters LastTIleParameters;
+
+	/*유효한 위치에서 grid 를 클릭하면 항목이 배치되는 Index */
+	int32 ItemDropIndex = INDEX_NONE;
+
+	FInv_SpaceQueryResult CurrentQueryResult;
+
+	bool bMouseWithinCanvas;
+	bool bLastMouseWithinCanvas;
+
+	int32 LastHighlightedIndex;
+	FIntPoint LastHighlightedDimensions;
 };

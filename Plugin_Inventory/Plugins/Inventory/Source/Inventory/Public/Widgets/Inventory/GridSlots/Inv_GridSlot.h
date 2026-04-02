@@ -47,14 +47,14 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> Image_GridSlot;
-	int32 TileIndex;
+	int32 TileIndex = INDEX_NONE; ;
 
 	EInv_GridSlotState GridSlotState;
 
-	int32 StackCount;
+	int32 StackCount = 0;
 	int32 UpperLeftIndex = INDEX_NONE;
 	TWeakObjectPtr<UInv_InventoryItem> InventoryItem;
-	bool bAvailable;
+	bool bAvailable = true;
 
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	FSlateBrush Brush_Unoccupied;
