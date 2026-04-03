@@ -10,8 +10,9 @@ void UInv_HoverItem::SetImageBrush(const FSlateBrush& Brush) const
 {
 	Image_Icon->SetBrush(Brush);
 }
-void UInv_HoverItem::UpdateStackCount(int32 Count) const
+void UInv_HoverItem::UpdateStackCount(int32 Count)
 {
+	StackCount = Count;
 	if (Count > 0)
 	{
 		Text_HoverStackCount->SetText(FText::AsNumber(Count));
@@ -49,4 +50,15 @@ UInv_InventoryItem* UInv_HoverItem::GetInventoryItem() const
 void UInv_HoverItem::SetInventoryItem(UInv_InventoryItem* Item)
 {
 	InventoryItem = Item;
+}
+
+void UInv_HoverItem::ClearItem()
+{
+	SetInventoryItem(nullptr);
+	SetIsStackable(false);
+	SetPreviousGridIndex(INDEX_NONE);
+	UpdateStackCount(0);
+	SetImageBrush(FSlateNoResource());
+
+	RemoveFromParent();
 }
