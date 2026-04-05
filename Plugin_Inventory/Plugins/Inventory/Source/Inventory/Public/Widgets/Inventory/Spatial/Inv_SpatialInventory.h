@@ -12,7 +12,7 @@
 class UInv_InventoryGrid;
 class UWidgetSwitcher;
 class UButton;
-
+class UCanvasPanel;
 
 UCLASS()
 class INVENTORY_API UInv_SpatialInventory : public UInv_InventoryBase
@@ -38,6 +38,9 @@ private:
 
 	void DisableButton(UButton* Button);
 
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UCanvasPanel> CanvasPanel;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UWidgetSwitcher> Switcher;

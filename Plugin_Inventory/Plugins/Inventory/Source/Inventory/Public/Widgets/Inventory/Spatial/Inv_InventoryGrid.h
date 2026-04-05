@@ -22,6 +22,7 @@ struct FInv_ImageFragment;
 struct FGameplayTag;
 class UInv_HoverItem;
 enum class EInv_GridSlotState : uint8;
+class UInv_ItemPopUp;
 
 
 UCLASS()
@@ -37,6 +38,7 @@ public:
 
 	void ShowCursor();
 	void HideCursor();
+	void SetOwningCanvas(UCanvasPanel* OwningCanvas);
 
 	UFUNCTION()
 	void AddItem(UInv_InventoryItem* Item);
@@ -93,6 +95,8 @@ private:
 	bool ShouldFillInStack(const int32 RoomInClickedSlot, const int32 HoverStackCount) const;
 	void FillInStack(const int32 FillAmount, const int32 Remainder, const int32 Index);
 
+	void CreateItemPopUp(const int32 GridIndex);
+
 	UUserWidget* GetVisibleCursorWidgt();
 	UUserWidget* GetHiddenCursorWidget();
 
@@ -123,8 +127,17 @@ private:
 
 	UFUNCTION()
 	void OnGridSlotUnhovered(int32 GridIndex, const FPointerEvent& MouseEvent);
+
+	UFUNCTION()
+	void OnPopUpMenuSplit(int32 SplitAmount, int32 Index);
+	UFUNCTION()
+	void OnPopUpMenuDrop(int32 Index);
+	UFUNCTION()
+	void OnPopUpMenuConsume(int32 Index);
+
 	
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
+	TWeakObjectPtr<UCanvasPanel> OwningCanvasPanel;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UCanvasPanel> CanvasPanel;
@@ -158,6 +171,15 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UInv_HoverItem> HoverItem;
+
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	TSubclassOf<UInv_ItemPopUp> ItemPopUpClass;
+
+	UPROPERTY()
+	TObjectPtr<UInv_ItemPopUp> ItemPopUp;
+
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	FVector2D ItemPopUpOffest;
 
 	FInv_TileParameters TileParameters;
 	FInv_TileParameters LastTIleParameters;
