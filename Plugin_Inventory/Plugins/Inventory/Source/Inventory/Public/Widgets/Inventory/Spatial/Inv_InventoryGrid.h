@@ -39,9 +39,12 @@ public:
 	void ShowCursor();
 	void HideCursor();
 	void SetOwningCanvas(UCanvasPanel* OwningCanvas);
+	void DropItem();
+	bool HasHoverItem() const;
 
 	UFUNCTION()
 	void AddItem(UInv_InventoryItem* Item);
+
 private:
 
 	void ConstructGrid();
@@ -96,6 +99,8 @@ private:
 	void FillInStack(const int32 FillAmount, const int32 Remainder, const int32 Index);
 
 	void CreateItemPopUp(const int32 GridIndex);
+
+
 
 	UUserWidget* GetVisibleCursorWidgt();
 	UUserWidget* GetHiddenCursorWidget();

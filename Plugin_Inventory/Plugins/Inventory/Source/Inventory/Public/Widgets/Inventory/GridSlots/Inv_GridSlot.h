@@ -34,6 +34,7 @@ public:
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
 
+
 	void SetTileIndex(int32 Index) { TileIndex = Index; }
 	int32 GetTileIndex() const { return TileIndex; }
 	EInv_GridSlotState GetGridSlotState() const { return GridSlotState; }
