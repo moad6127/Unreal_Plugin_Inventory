@@ -6,6 +6,7 @@
 #include "GameplayTagContainer.h"
 #include "Inv_ItemFragment.generated.h"
 
+class APlayerController;
 
 //Fragment를 사용해서 manifest에 표시할 내용들을 표시하기
 //가장 최상위의 Fragment로 모든 Fragment는 해당 구조체를 부모로 두고 사용해야한다.
@@ -29,7 +30,7 @@ public:
 
 private:
 
-	UPROPERTY(EditAnywhere, Category = "Inventory")
+	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (Categories = "FragmentTags"))
 	FGameplayTag FragmentTag = FGameplayTag::EmptyTag;
 };
 
@@ -91,5 +92,41 @@ private:
 	int32 StackCount = 1;
 };
 
+USTRUCT(BlueprintType)
+struct FInv_ConsumableFragment : public FInv_ItemFragment
+{
+	GENERATED_BODY()
+	
+	virtual void OnConsume(APlayerController* PC) {}
 
+private:
+	
+};
 
+USTRUCT(BlueprintType)
+struct FInv_HealthPotionFragment : public FInv_ConsumableFragment
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	float HealAmount = 20.f;
+
+	virtual void OnConsume(APlayerController* PC) override;
+
+private:
+
+};
+
+USTRUCT(BlueprintType)
+struct FInv_ManaPotionFragment : public FInv_ConsumableFragment
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	float ManaAmount = 20.f;
+
+	virtual void OnConsume(APlayerController* PC) override;
+
+private:
+
+};
