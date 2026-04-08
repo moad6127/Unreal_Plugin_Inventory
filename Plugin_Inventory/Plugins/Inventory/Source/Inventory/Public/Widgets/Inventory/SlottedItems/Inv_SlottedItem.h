@@ -24,6 +24,8 @@ class INVENTORY_API UInv_SlottedItem : public UUserWidget
 public:
 
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 
 	void SetIsStackable(bool bStackable) { bIsStackable = bStackable; }
 	UImage* GetImageIcon() const { return Image_Icon; }

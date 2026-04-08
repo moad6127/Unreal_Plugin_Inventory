@@ -30,6 +30,32 @@ bool UInv_WidgetUtils::IsWithinBound(const FVector2D& BoundaryPos, const FVector
 
 }
 
+FVector2D UInv_WidgetUtils::GetClampedWidgetPosition(const FVector2D& Boundary, const FVector2D& WidgetSize, const FVector2D MousePos)
+{
+	FVector2D ClampedPosition = MousePos;
+
+	//위젯이 경계내부에 위치하도록 가로위치를 조정한다.
+	if (MousePos.X + WidgetSize.X > Boundary.X) // 오른쪽가장자리를 초과하면,
+	{
+		ClampedPosition.X = Boundary.X - WidgetSize.X;
+	}
+	if (MousePos.X < 0.f)//왼쪽 초과
+	{
+		ClampedPosition.X = 0.f;
+	}
+
+	//수직 위치 조정
+	if (MousePos.Y + WidgetSize.Y > Boundary.Y) //Botton초과
+	{
+		ClampedPosition.Y = Boundary.Y - WidgetSize.Y;
+	}
+	if (MousePos.Y < 0.f)//위쪽초과
+	{
+		ClampedPosition.Y = 0.f;
+	}
+	return ClampedPosition;
+}
+
 int32 UInv_WidgetUtils::GetIndexFromPosition(const FIntPoint& Position, const int32 Columns)
 {
 	return Position.X + Position.Y * Columns;

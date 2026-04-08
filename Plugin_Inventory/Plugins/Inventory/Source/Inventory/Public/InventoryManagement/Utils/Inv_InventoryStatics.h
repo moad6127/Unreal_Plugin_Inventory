@@ -13,6 +13,7 @@
  */
 class UInv_InventoryComponent;
 class UInv_ItemComponent;
+class UInv_InventoryItem;
 
 UCLASS()
 class INVENTORY_API UInv_InventoryStatics : public UBlueprintFunctionLibrary
@@ -29,6 +30,13 @@ public:
 
 	template<typename T, typename FuncT>
 	static void ForEach2D(TArray<T>& Array, int32 Index, const FIntPoint& Range2D, int32 GridColumns, const FuncT& Function);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	static void ItemHovred(APlayerController* PC, UInv_InventoryItem* Item);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	static void ItemUnhovred(APlayerController* PC);
+
 };
 
 template<typename T, typename FuncT>

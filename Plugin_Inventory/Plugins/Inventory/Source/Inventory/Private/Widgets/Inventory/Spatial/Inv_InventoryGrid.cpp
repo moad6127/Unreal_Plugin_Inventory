@@ -607,6 +607,8 @@ void UInv_InventoryGrid::AddStacks(const FInv_SlotAvailabilityResult& Result)
 
 void UInv_InventoryGrid::OnSlottedItemClicked(int32 GridIndex, const FPointerEvent& MouseEvent)
 {
+	UInv_InventoryStatics::ItemUnhovred(GetOwningPlayer());
+
 	check(GridSlots.IsValidIndex(GridIndex));
 
 	UInv_InventoryItem* ClickedInventoryItem = GridSlots[GridIndex]->GetInventoryItem().Get();
@@ -875,6 +877,10 @@ void UInv_InventoryGrid::OnGridSlotClicked(int32 GridIndex, const FPointerEvent&
 	if (CurrentQueryResult.ValidItem.IsValid() && GridSlots.IsValidIndex(CurrentQueryResult.UpperLeftIndex))
 	{
 		OnSlottedItemClicked(CurrentQueryResult.UpperLeftIndex, MouseEvent);
+		return;
+	}
+	if (!CurrentQueryResult.bHasSpace)
+	{
 		return;
 	}
 
