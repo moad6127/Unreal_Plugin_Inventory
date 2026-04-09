@@ -34,6 +34,20 @@ private:
 	FGameplayTag FragmentTag = FGameplayTag::EmptyTag;
 };
 
+/*
+* 위젯의 assimilation을 위한 Fragment
+*/
+class UInv_CompositeBase;
+
+USTRUCT(BlueprintType)
+struct FInv_InventoryItemFragment : public FInv_ItemFragment
+{
+	GENERATED_BODY()
+
+	virtual void Assimilate(UInv_CompositeBase* Composite) const;
+protected:
+	bool MatchesWidgetTag(const UInv_CompositeBase* Composite) const;
+};
 
 /*
 * 인벤토리의 Grid에 사용할 정보들을 담기위한 Fragment이다.
@@ -61,11 +75,12 @@ private:
 * 인벤토리에 표시할 Image정보를 담기위한 Fragment이다.
 */
 USTRUCT(BlueprintType)
-struct FInv_ImageFragment : public FInv_ItemFragment
+struct FInv_ImageFragment : public FInv_InventoryItemFragment
 {
 	GENERATED_BODY()
 
 	UTexture2D* GetIcon()const { return Icon; }
+	virtual void Assimilate(UInv_CompositeBase* Composite) const override;
 private:
 
 	UPROPERTY(EditAnywhere, Category = "Inventory")
