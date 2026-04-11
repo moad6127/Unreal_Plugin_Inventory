@@ -89,6 +89,7 @@ void UInv_SpatialInventory::OnItemHovered(UInv_InventoryItem* Item)
 	const auto& Manifest = Item->GetItemManifest();
 	UInv_ItemDescription* DescriptionWidget = GetItemDescription();
 	DescriptionWidget->SetVisibility(ESlateVisibility::Collapsed);
+	DescriptionWidget->Collapse();
 
 	GetOwningPlayer()->GetWorldTimerManager().ClearTimer(DescriptionTimer);
 

@@ -22,7 +22,7 @@ struct INVENTORY_API FInv_ItemManifest
 {
 	GENERATED_BODY()
 public:
-
+	TArray<TInstancedStruct<FInv_ItemFragment>>& GetFragmentsMutable() { return Fragments; }
 	UInv_InventoryItem* Manifest(UObject* NewOuter);
 
 	EInv_ItemCategory GetItemCategory() const { return ItemCategory; }
@@ -43,6 +43,7 @@ public:
 
 	void SpawnPickupActor(const UObject* WorldContextObject, const FVector& SpawnLocation, const FRotator& SpawnRotation);
 private:
+	void ClearFragments();
 
 	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (ExcludeBaseStruct))
 	TArray<TInstancedStruct<FInv_ItemFragment>> Fragments;

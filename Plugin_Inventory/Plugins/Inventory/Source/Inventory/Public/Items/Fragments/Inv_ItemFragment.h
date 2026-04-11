@@ -27,7 +27,7 @@ public:
 
 	FGameplayTag GetFragmentTag() const { return FragmentTag; }
 	void SetFragmentTag(FGameplayTag Tag) { FragmentTag = Tag; }
-
+	virtual void Manifest() {}
 private:
 
 	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (Categories = "FragmentTags"))
@@ -102,6 +102,42 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	FText FragmentText;
+};
+
+USTRUCT(BlueprintType)
+struct FInv_LabelNumberFragment : public FInv_InventoryItemFragment
+{
+	GENERATED_BODY()
+
+	virtual void Manifest() override;
+	virtual void Assimilate(UInv_CompositeBase* Composite) const override;
+
+	//처음 Manifest가 실행되면 랜덤값이 설정되도록 체크하는 bool변수
+	bool bRandomizeOnManifest = true;
+private:
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	FText Text_Label{};
+
+	UPROPERTY(VisibleAnywhere, Category = "Inventory")
+	float Value = 0.f;
+
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	float Min = 0.f;
+
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	float Max = 0.f;
+
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	bool bCollapseLabel = false;
+
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	bool bCollapseValue = false;
+
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	int32 MinFractionalDigits = 1;
+
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	int32 MaxFractionalDigits = 1;
 };
 
 USTRUCT(BlueprintType)
