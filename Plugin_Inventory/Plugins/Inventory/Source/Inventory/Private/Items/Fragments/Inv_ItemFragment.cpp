@@ -13,12 +13,12 @@ void FInv_HealthPotionFragment::OnConsume(APlayerController* PC)
 	//PC를 사용해 게임구조에 맞는 Consume사용하기
 	//예를 들어 GAS에서 사용할경우 PC에서 AbilitySystemComp를 가져와 GameplayEffect를 적용시키는 방법등이 있다.
 
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("HealthPotion consumed Healing by :%f"), HealAmount));
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("HealthPotion consumed Healing by :%f"), GetValue()));
 }
 
 void FInv_ManaPotionFragment::OnConsume(APlayerController* PC)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Blue, FString::Printf(TEXT("ManaPotion consumed Healing by :%f"), ManaAmount));
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Blue, FString::Printf(TEXT("ManaPotion consumed Healing by :%f"), GetValue()));
 
 }
 
@@ -99,4 +99,35 @@ void FInv_LabelNumberFragment::Assimilate(UInv_CompositeBase* Composite) const
 	Options.MinimumFractionalDigits = MinFractionalDigits;
 	Options.MaximumFractionalDigits = MaxFractionalDigits;
 	LabeledValue->SetText_Value(FText::AsNumber(Value, &Options), bCollapseValue);
+}
+
+void FInv_ConsumableFragment::OnConsume(APlayerController* PC)
+{
+	for (TInstancedStruct<FInv_ConsumeModifire>& Modifire : ConsumeModifires)
+	{
+		auto& ModRef = Modifire.GetMutable();
+		ModRef.OnConsume(PC);
+
+	}
+}
+
+
+void FInv_ConsumableFragment::Assimilate(UInv_CompositeBase* Composite) const
+{
+	FInv_InventoryItemFragment::Assimilate(Composite);
+	for (const TInstancedStruct<FInv_ConsumeModifire>& Modifire : ConsumeModifires)
+	{
+		const auto& ModRef = Modifire.Get();
+		ModRef.Assimilate(Composite);
+	}
+}
+
+void FInv_ConsumableFragment::Manifest()
+{
+	FInv_InventoryItemFragment::Manifest();
+	for (TInstancedStruct<FInv_ConsumeModifire>& Modifire : ConsumeModifires)
+	{
+		auto& ModRef = Modifire.GetMutable();
+		ModRef.Manifest();
+	}
 }

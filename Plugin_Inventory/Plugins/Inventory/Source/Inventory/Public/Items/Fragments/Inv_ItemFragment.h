@@ -112,6 +112,7 @@ struct FInv_LabelNumberFragment : public FInv_InventoryItemFragment
 	virtual void Manifest() override;
 	virtual void Assimilate(UInv_CompositeBase* Composite) const override;
 
+	float GetValue() const { return Value; }
 	//처음 Manifest가 실행되면 랜덤값이 설정되도록 체크하는 bool변수
 	bool bRandomizeOnManifest = true;
 private:
@@ -157,24 +158,34 @@ private:
 	int32 StackCount = 1;
 };
 
+// Consume Fragments
 USTRUCT(BlueprintType)
-struct FInv_ConsumableFragment : public FInv_ItemFragment
+struct FInv_ConsumeModifire : public FInv_LabelNumberFragment
 {
 	GENERATED_BODY()
-	
+
 	virtual void OnConsume(APlayerController* PC) {}
 
-private:
-	
 };
 
 USTRUCT(BlueprintType)
-struct FInv_HealthPotionFragment : public FInv_ConsumableFragment
+struct FInv_ConsumableFragment : public FInv_InventoryItemFragment
 {
 	GENERATED_BODY()
+	
+	virtual void OnConsume(APlayerController* PC);
+	virtual void Assimilate(UInv_CompositeBase* Composite) const override;
+	virtual void Manifest() override;
 
-	UPROPERTY(EditAnywhere, Category = "Inventory")
-	float HealAmount = 20.f;
+private:
+	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (ExcludeBaseStruct))
+	TArray<TInstancedStruct<FInv_ConsumeModifire>> ConsumeModifires;
+};
+
+USTRUCT(BlueprintType)
+struct FInv_HealthPotionFragment : public FInv_ConsumeModifire
+{
+	GENERATED_BODY()
 
 	virtual void OnConsume(APlayerController* PC) override;
 
@@ -183,12 +194,9 @@ private:
 };
 
 USTRUCT(BlueprintType)
-struct FInv_ManaPotionFragment : public FInv_ConsumableFragment
+struct FInv_ManaPotionFragment : public FInv_ConsumeModifire
 {
 	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, Category = "Inventory")
-	float ManaAmount = 20.f;
 
 	virtual void OnConsume(APlayerController* PC) override;
 
