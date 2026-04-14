@@ -12,6 +12,7 @@
  */
 class UInv_ItemComponent;
 class UInv_InventoryItem;
+class UInv_HoverItem;
 UCLASS()
 class INVENTORY_API UInv_InventoryBase : public UUserWidget
 {
@@ -21,4 +22,5 @@ public:
 	virtual void OnItemHovered(UInv_InventoryItem* Item) {}
 	virtual void OnItemUnhovered() {}
 	virtual bool HasHoverItem() const { return false; }
+	virtual UInv_HoverItem* GetHoverItem() const { return nullptr; }
 };

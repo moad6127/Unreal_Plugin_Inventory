@@ -14,6 +14,8 @@ class UWidgetSwitcher;
 class UButton;
 class UCanvasPanel;
 class UInv_ItemDescription;
+class UInv_EquippedGridSlot;
+class UInv_HoverItem;
 
 UCLASS()
 class INVENTORY_API UInv_SpatialInventory : public UInv_InventoryBase
@@ -30,6 +32,7 @@ public:
 	virtual void OnItemHovered(UInv_InventoryItem* Item)override;
 	virtual void OnItemUnhovered() override;
 	virtual bool HasHoverItem() const override;
+	virtual UInv_HoverItem* GetHoverItem() const override;
 
 private:
 	UFUNCTION()
@@ -41,12 +44,17 @@ private:
 	UFUNCTION()
 	void ShowCraftables();
 
+	UFUNCTION()
+	void EquippedGridSlotClicked(UInv_EquippedGridSlot* EquippedGridSlot, const FGameplayTag& EquipmentTypeTag);
+
 	void SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button);
 
 	void DisableButton(UButton* Button);
 	UInv_ItemDescription* GetItemDescription();
 	void SetItemDescriptionSizeAndPosition(UInv_ItemDescription* Description, UCanvasPanel* Canvas) const;
 
+	UPROPERTY()
+	TArray<TObjectPtr<UInv_EquippedGridSlot>> EquippedGridSlots;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UCanvasPanel> CanvasPanel;

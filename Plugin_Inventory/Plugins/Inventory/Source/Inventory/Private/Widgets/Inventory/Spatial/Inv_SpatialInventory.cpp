@@ -2,15 +2,20 @@
 
 
 #include "Widgets/Inventory/Spatial/Inv_SpatialInventory.h"
+#include "Widgets/Inventory/GridSlots/Inv_EquippedGridSlot.h"
+#include "Widgets/Inventory/Spatial/Inv_InventoryGrid.h"
+#include "Widgets/ItemDescription/Inv_ItemDescription.h"
+
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
-#include "Widgets/Inventory/Spatial/Inv_InventoryGrid.h"
+
 #include "InventoryManagement/Utils/Inv_InventoryStatics.h"
 #include "Inventory.h"
-#include "Widgets/ItemDescription/Inv_ItemDescription.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
+#include "Blueprint/WidgetTree.h"
+
 #include "Items/Inv_InventoryItem.h"
  
 void UInv_SpatialInventory::NativeOnInitialized()
@@ -26,6 +31,16 @@ void UInv_SpatialInventory::NativeOnInitialized()
 	Grid_Craftables->SetOwningCanvas(CanvasPanel);
 
 	ShowEquippables();
+
+	WidgetTree->ForEachWidget([this](UWidget* Widget) 
+		{
+			UInv_EquippedGridSlot* EquippedGridSlot = Cast<UInv_EquippedGridSlot>(Widget);
+			if (IsValid(EquippedGridSlot))
+			{
+				EquippedGridSlots.Add(EquippedGridSlot);
+				EquippedGridSlot->EquippedGridSlotClicked.AddDynamic(this, &UInv_SpatialInventory::EquippedGridSlotClicked);
+			}
+		});
 }
 
 FReply UInv_SpatialInventory::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -136,6 +151,15 @@ bool UInv_SpatialInventory::HasHoverItem() const
 	return false;
 }
 
+UInv_HoverItem* UInv_SpatialInventory::GetHoverItem() const
+{
+	if (!ActiveGrid.IsValid())
+	{
+		return nullptr;
+	}
+	return ActiveGrid->GetHoverItem();
+}
+
 void UInv_SpatialInventory::ShowEquippables()
 {
 	SetActiveGrid(Grid_Equippable, Button_Equippables);
@@ -149,6 +173,10 @@ void UInv_SpatialInventory::ShowConsumables()
 void UInv_SpatialInventory::ShowCraftables()
 {
 	SetActiveGrid(Grid_Craftables, Button_Craftables);
+}
+
+void UInv_SpatialInventory::EquippedGridSlotClicked(UInv_EquippedGridSlot* EquippedGridSlot, const FGameplayTag& EquipmentTypeTag)
+{
 }
 
 void UInv_SpatialInventory::SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button)

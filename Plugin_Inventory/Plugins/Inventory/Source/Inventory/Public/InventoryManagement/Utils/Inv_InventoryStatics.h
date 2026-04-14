@@ -14,6 +14,7 @@
 class UInv_InventoryComponent;
 class UInv_ItemComponent;
 class UInv_InventoryItem;
+class UInv_HoverItem;
 
 UCLASS()
 class INVENTORY_API UInv_InventoryStatics : public UBlueprintFunctionLibrary
@@ -36,6 +37,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	static void ItemUnhovred(APlayerController* PC);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	static UInv_HoverItem* GetHoverItem(APlayerController* PC);
 
 };
 
