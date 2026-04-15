@@ -203,3 +203,49 @@ struct FInv_ManaPotionFragment : public FInv_ConsumeModifire
 private:
 
 };
+
+/*
+* Equipment
+* 
+*/
+USTRUCT(BlueprintType)
+struct FInv_EquipModifier : public FInv_LabelNumberFragment
+{
+	GENERATED_BODY()
+public:
+	virtual void OnEquip(APlayerController* PC) {}
+	virtual void OnUnequip(APlayerController* PC) {}
+
+private:
+
+};
+
+USTRUCT(BlueprintType)
+struct FInv_StrengthModifier : public FInv_EquipModifier
+{
+	GENERATED_BODY()
+public:
+	virtual void OnEquip(APlayerController* PC) override;
+	virtual void OnUnequip(APlayerController* PC) override;
+
+private:
+
+};
+
+
+
+USTRUCT(BlueprintType)
+struct FInv_EquipmentFragment : public FInv_InventoryItemFragment
+{
+	GENERATED_BODY()
+public:
+	void OnEquip(APlayerController* PC);
+	void OnUnequip(APlayerController* PC);
+	virtual void Assimilate(UInv_CompositeBase* Composite) const override;
+
+	bool bEquipped = false;
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	TArray<TInstancedStruct<FInv_EquipModifier>> EquipModifiers;
+};
