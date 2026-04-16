@@ -16,6 +16,7 @@ class UCanvasPanel;
 class UInv_ItemDescription;
 class UInv_EquippedGridSlot;
 class UInv_HoverItem;
+class UInv_EquippedSlottedItem;
 
 UCLASS()
 class INVENTORY_API UInv_SpatialInventory : public UInv_InventoryBase
@@ -33,6 +34,7 @@ public:
 	virtual void OnItemUnhovered() override;
 	virtual bool HasHoverItem() const override;
 	virtual UInv_HoverItem* GetHoverItem() const override;
+	virtual float GetTileSize() const override;
 
 private:
 	UFUNCTION()
@@ -46,6 +48,9 @@ private:
 
 	UFUNCTION()
 	void EquippedGridSlotClicked(UInv_EquippedGridSlot* EquippedGridSlot, const FGameplayTag& EquipmentTypeTag);
+
+	UFUNCTION()
+	void EquippedSlottedItemCliced(UInv_EquippedSlottedItem* SlottedItem);
 
 	void SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button);
 

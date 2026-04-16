@@ -4,8 +4,9 @@
 #include "Widgets/Inventory/Spatial/Inv_SpatialInventory.h"
 #include "Widgets/Inventory/GridSlots/Inv_EquippedGridSlot.h"
 #include "Widgets/Inventory/Spatial/Inv_InventoryGrid.h"
-#include "Widgets/ItemDescription/Inv_ItemDescription.h"
 #include "Widgets/Inventory/HoverItem/Inv_HoverItem.h"
+#include "Widgets/Inventory/SlottedItems/Inv_EquippedSlottedItem.h"
+#include "Widgets/ItemDescription/Inv_ItemDescription.h"
 
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
@@ -182,6 +183,11 @@ UInv_HoverItem* UInv_SpatialInventory::GetHoverItem() const
 	return ActiveGrid->GetHoverItem();
 }
 
+float UInv_SpatialInventory::GetTileSize() const
+{
+	return Grid_Equippable->GetTileSize();
+}
+
 void UInv_SpatialInventory::ShowEquippables()
 {
 	SetActiveGrid(Grid_Equippable, Button_Equippables);
@@ -204,10 +210,22 @@ void UInv_SpatialInventory::EquippedGridSlotClicked(UInv_EquippedGridSlot* Equip
 	{
 		return;
 	}
+	UInv_HoverItem* HoverItem = GetHoverItem();
 	// Equipped Slotted Item을 만들고 EquipGridSlot에 장착하기
+	const float TileSize = UInv_InventoryStatics::GetInventoryWidget(GetOwningPlayer())->GetTileSize();
+	UInv_EquippedSlottedItem* EquippedSlottedItem = EquippedGridSlot->OnItemEquipped(
+		HoverItem->GetInventoryItem(),
+		EquipmentTypeTag,
+		TileSize
+	);
+	EquippedSlottedItem->OnEquippeedSlottedItemClicked.AddDynamic(this, &UInv_SpatialInventory::EquippedSlottedItemCliced);
 	// HoverItem을 Clear하기
 	// 아이템을 Equip한것을 서버에 알리기(멀티플레이전용)(Unequip도 같은 것으로)
-}  
+}
+
+void UInv_SpatialInventory::EquippedSlottedItemCliced(UInv_EquippedSlottedItem* SlottedItem)
+{
+}
 
 void UInv_SpatialInventory::SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button)
 {
