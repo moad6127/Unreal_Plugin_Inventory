@@ -50,7 +50,7 @@ private:
 	void EquippedGridSlotClicked(UInv_EquippedGridSlot* EquippedGridSlot, const FGameplayTag& EquipmentTypeTag);
 
 	UFUNCTION()
-	void EquippedSlottedItemCliced(UInv_EquippedSlottedItem* SlottedItem);
+	void EquippedSlottedItemClicked(UInv_EquippedSlottedItem* SlottedItem);
 
 	void SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button);
 

@@ -14,6 +14,7 @@
 #include "Components/CanvasPanelSlot.h"
 
 #include "InventoryManagement/Utils/Inv_InventoryStatics.h"
+#include "InventoryManagement/Components/Inv_InventoryComponent.h"
 #include "Inventory.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Blueprint/WidgetTree.h"
@@ -218,13 +219,23 @@ void UInv_SpatialInventory::EquippedGridSlotClicked(UInv_EquippedGridSlot* Equip
 		EquipmentTypeTag,
 		TileSize
 	);
-	EquippedSlottedItem->OnEquippeedSlottedItemClicked.AddDynamic(this, &UInv_SpatialInventory::EquippedSlottedItemCliced);
+	EquippedSlottedItem->OnEquippeedSlottedItemClicked.AddDynamic(this, &UInv_SpatialInventory::EquippedSlottedItemClicked);
 	// HoverItem을 Clear하기
+	Grid_Equippable->ClearHoverItem();
 	// 아이템을 Equip한것을 서버에 알리기(멀티플레이전용)(Unequip도 같은 것으로)
+	UInv_InventoryComponent* InventoryComponent = UInv_InventoryStatics::GetInventoryComponent(GetOwningPlayer());
+	check(IsValid(InventoryComponent));
+
+	InventoryComponent->Server_EquipSlotClicked(HoverItem->GetInventoryItem(), nullptr);
+	if (GetOwningPlayer()->GetNetMode() != NM_DedicatedServer)
+	{
+		InventoryComponent->OnItemEquip.Broadcast(HoverItem->GetInventoryItem());
+	}
 }
 
-void UInv_SpatialInventory::EquippedSlottedItemCliced(UInv_EquippedSlottedItem* SlottedItem)
+void UInv_SpatialInventory::EquippedSlottedItemClicked(UInv_EquippedSlottedItem* SlottedItem)
 {
+
 }
 
 void UInv_SpatialInventory::SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button)

@@ -43,7 +43,7 @@ public:
 	bool HasHoverItem() const;
 	UInv_HoverItem* GetHoverItem() const;
 	float GetTileSize() const { return TileSize; }
-
+	void ClearHoverItem();
 	UFUNCTION()
 	void AddItem(UInv_InventoryItem* Item);
 
@@ -90,7 +90,7 @@ private:
 	void ChangeHoverType(const int32 Index, const FIntPoint& Dimensions, EInv_GridSlotState GridSlotState);
 
 	void PutDownOnIndex(const int32 Index);
-	void ClearHoverItem();
+
 	bool IsSameStackable(const UInv_InventoryItem* ClickedInventoryItem)const;
 	void SwapWithHoverItem(UInv_InventoryItem* ClickedInventoryItem, const int32 GridIndex);
 	bool ShouldSwapStackCount(const int32 RoomInClickedSlot, const int32 HoveredStackCount, const int32 MaxStackSize) const;
