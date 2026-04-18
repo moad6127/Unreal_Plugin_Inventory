@@ -107,6 +107,70 @@ bool UInv_SpatialInventory::CanEquipHoverItem(UInv_EquippedGridSlot* EquippedGri
 		HeldItem->GetItemManifest().GetItemType().MatchesTag(EquipmentTypeTag);
 }
 
+UInv_EquippedGridSlot* UInv_SpatialInventory::FindSlotWithEquippedItem(UInv_InventoryItem* EquippedItem) const
+{
+	auto* FoundEquippedGridSlot = EquippedGridSlots.FindByPredicate([EquippedItem](UInv_EquippedGridSlot* GridSlot)
+		{
+			return GridSlot->GetInventoryItem() == EquippedItem;
+		});
+	return FoundEquippedGridSlot ? *FoundEquippedGridSlot : nullptr;
+}
+
+void UInv_SpatialInventory::ClearSlotOfItem(UInv_EquippedGridSlot* EquippedGridSlot)
+{
+	if (IsValid(EquippedGridSlot))
+	{
+		EquippedGridSlot->SetEquippedSlottedItem(nullptr);
+		EquippedGridSlot->SetInventoryItem(nullptr);
+	}
+}
+
+void UInv_SpatialInventory::RemoveEquippedSlottedItem(UInv_EquippedSlottedItem* EquippedSlottedItem)
+{
+	// ( OnEquippedSlottedItemClicked UnBind하기)
+	// Removing the Equipped Slotted Item from Parent
+	if (!IsValid(EquippedSlottedItem))
+	{
+		return;
+	}
+	if (EquippedSlottedItem->OnEquippeedSlottedItemClicked.IsAlreadyBound(this, &UInv_SpatialInventory::EquippedSlottedItemClicked))
+	{
+		EquippedSlottedItem->OnEquippeedSlottedItemClicked.RemoveDynamic(this, &UInv_SpatialInventory::EquippedSlottedItemClicked);
+	}
+	EquippedSlottedItem->RemoveFromParent();
+}
+
+void UInv_SpatialInventory::MakeEquippedSlottedItem(UInv_EquippedSlottedItem* EquippedSlottedItem, UInv_EquippedGridSlot* EquippedGridSlot, UInv_InventoryItem* ItemToEquip)
+{
+	if (!IsValid(EquippedGridSlot))
+	{
+		return;
+	}
+
+	UInv_EquippedSlottedItem* SlottedItem = EquippedGridSlot->OnItemEquipped(
+		ItemToEquip,
+		EquippedSlottedItem->GetEquipmentTypeTag(),
+		GetTileSize());
+	if (IsValid(SlottedItem))
+	{
+		SlottedItem->OnEquippeedSlottedItemClicked.AddDynamic(this, &UInv_SpatialInventory::EquippedSlottedItemClicked);
+	}
+	EquippedGridSlot->SetEquippedSlottedItem(SlottedItem);
+}
+
+void UInv_SpatialInventory::BroadcastSlotClickedDelegates(UInv_InventoryItem* ItemToEquip, UInv_InventoryItem* ItemToUnequip) const
+{
+	UInv_InventoryComponent* InventoryComp = UInv_InventoryStatics::GetInventoryComponent(GetOwningPlayer());
+	check(IsValid(InventoryComp));
+	InventoryComp->Server_EquipSlotClicked(ItemToEquip, ItemToUnequip);
+
+	if (GetOwningPlayer()->GetNetMode() != NM_DedicatedServer)
+	{
+		InventoryComp->OnItemEquip.Broadcast(ItemToEquip);
+		InventoryComp->OnItemUnequip.Broadcast(ItemToUnequip);
+	}
+}
+
 FInv_SlotAvailabilityResult UInv_SpatialInventory::HasRoomForItem(UInv_ItemComponent* ItemComponent) const
 {
 	switch (UInv_InventoryStatics::GetItemCategoryFromItemComp(ItemComponent))
@@ -235,7 +299,33 @@ void UInv_SpatialInventory::EquippedGridSlotClicked(UInv_EquippedGridSlot* Equip
 
 void UInv_SpatialInventory::EquippedSlottedItemClicked(UInv_EquippedSlottedItem* SlottedItem)
 {
+	//장착된 아이템의 GridSlot을 Click했을때 일어나야 하는 상황들
 
+	//  Item Description 제거
+	UInv_InventoryStatics::ItemUnhovred(GetOwningPlayer());
+
+	if (IsValid(GetHoverItem()) && GetHoverItem()->IsStackable())
+	{
+		return;
+	}
+	// 해당 타입의 EquippedGridSlot가져오기
+		// 장착할 아이템 가져오기
+		// Unequip할 장비 가져오기
+	UInv_InventoryItem* ItemToEquip = IsValid(GetHoverItem()) ? GetHoverItem()->GetInventoryItem() : nullptr;
+	UInv_InventoryItem* ItemToUnequip = SlottedItem->GetInventoryItem();
+	UInv_EquippedGridSlot* EquippedGridSlot = FindSlotWithEquippedItem(ItemToUnequip);
+	// 해당 타입의 EquippedGridSlot Clear하기 (set it's inventory item to nullptr)
+	ClearSlotOfItem(EquippedGridSlot);
+
+	// 이전에 장착된 아이템을 새로운 HoverItem으로 할당하기
+	Grid_Equippable->AssignHoverItem(ItemToUnequip);
+
+	// EquippedGridSlot 의 아이템을 제거하기
+	RemoveEquippedSlottedItem(SlottedItem);
+	// 새로운 EquippedSlottedItem만들기 (새로 장비할 아이템)
+	MakeEquippedSlottedItem(SlottedItem, EquippedGridSlot, ItemToEquip);
+	// OnItemEquipped/OnItemUnequipped Broadcast 하기  (from the IC)
+	BroadcastSlotClickedDelegates(ItemToEquip, ItemToUnequip);
 }
 
 void UInv_SpatialInventory::SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button)
