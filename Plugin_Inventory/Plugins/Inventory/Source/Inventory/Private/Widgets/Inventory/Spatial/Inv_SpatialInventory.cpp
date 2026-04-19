@@ -333,6 +333,7 @@ void UInv_SpatialInventory::SetActiveGrid(UInv_InventoryGrid* Grid, UButton* But
 	if (ActiveGrid.IsValid())
 	{
 		ActiveGrid->HideCursor();
+		ActiveGrid->OnHide();
 	}
 	ActiveGrid = Grid;
 	if (ActiveGrid.IsValid())

@@ -27,7 +27,7 @@ void UInv_InventoryGrid::NativeOnInitialized()
 	InventoryComponent = UInv_InventoryStatics::GetInventoryComponent(GetOwningPlayer());
 	InventoryComponent->OnItemAdded.AddDynamic(this, &UInv_InventoryGrid::AddItem);
 	InventoryComponent->OnStackChange.AddDynamic(this, &UInv_InventoryGrid::AddStacks);
-
+	InventoryComponent->OnInventoryMenuToggled.AddDynamic(this, &UInv_InventoryGrid::OnInventoryMenuToggled);
 
 }
 
@@ -290,12 +290,12 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_ItemCo
 	return HasRoomForItem(ItemCompoennt->GetItemManifest());
 }
 
-FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_InventoryItem* Item)
+FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_InventoryItem* Item, const int32 StackAmountOverride)
 {
-	return HasRoomForItem(Item->GetItemManifest());
+	return HasRoomForItem(Item->GetItemManifest(), StackAmountOverride);
 }
 
-FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemManifest& Manifest)
+FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemManifest& Manifest, const int32 StackAmountOverride)
 {
 	FInv_SlotAvailabilityResult Result;
 
@@ -308,6 +308,10 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 	//얼마나 stack을 할지 확인
 	const int32 MaxStackSize = StackableFragment ? StackableFragment->GetMaxStackSize() : 1;
 	int32 AmountToFill = StackableFragment ? StackableFragment->GetStackCount() : 1;
+	if (StackAmountOverride != -1 && Result.bStackable)
+	{
+		AmountToFill = StackAmountOverride;
+	}
 
 	TSet<int32> CheckedIndices;
 	//For each Grid Slot
@@ -521,11 +525,29 @@ void UInv_InventoryGrid::PickUp(UInv_InventoryItem* ClickedInventoryItem, const 
 	RemoveItemFromGrid(ClickedInventoryItem, GridIndex);
 }
 
+void UInv_InventoryGrid::PutHoverItemBack()
+{
+	if (!IsValid(HoverItem))
+	{
+		return;
+	}
+
+	FInv_SlotAvailabilityResult Result = HasRoomForItem(HoverItem->GetInventoryItem(), HoverItem->GetStackCount());
+	Result.Item = HoverItem->GetInventoryItem();
+
+	AddStacks(Result);
+	ClearHoverItem();
+}
+
 void UInv_InventoryGrid::AssignHoverItem(UInv_InventoryItem* InventoryItem, const int32 GridIndex, const int32 PreviousGridIndex)
 {
 	AssignHoverItem(InventoryItem);
 	HoverItem->SetPreviousGridIndex(PreviousGridIndex);
 	HoverItem->UpdateStackCount(InventoryItem->IsStackable() ? GridSlots[GridIndex]->GetStackCount() : 0);
+}
+void UInv_InventoryGrid::OnHide()
+{
+	PutHoverItemBack();
 }
 
 void UInv_InventoryGrid::RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, const int32 GridIndex)
@@ -662,8 +684,11 @@ void UInv_InventoryGrid::OnSlottedItemClicked(int32 GridIndex, const FPointerEve
 		}
 	}
 
-	//위의 상황이 아닐경우 swap하기
-	SwapWithHoverItem(ClickedInventoryItem, GridIndex);
+	if (CurrentQueryResult.ValidItem.IsValid())
+	{
+		//위의 상황이 아닐경우 swap하기
+		SwapWithHoverItem(ClickedInventoryItem, GridIndex);
+	}
 }
 
 void UInv_InventoryGrid::CreateItemPopUp(const int32 GridIndex)
@@ -1127,6 +1152,14 @@ void UInv_InventoryGrid::OnPopUpMenuConsume(int32 Index)
 	if (NewStackCount <= 0)
 	{
 		RemoveItemFromGrid(RightClickItem, Index);
+	}
+}
+
+void UInv_InventoryGrid::OnInventoryMenuToggled(bool bOpen)
+{
+	if (!bOpen)
+	{
+		PutHoverItemBack();
 	}
 }
 

@@ -45,14 +45,16 @@ public:
 	float GetTileSize() const { return TileSize; }
 	void ClearHoverItem();
 	void AssignHoverItem(UInv_InventoryItem* InventoryItem);
+	void OnHide();
+
 	UFUNCTION()
 	void AddItem(UInv_InventoryItem* Item);
 
 private:
 
 	void ConstructGrid();
-	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_InventoryItem* Item);
-	FInv_SlotAvailabilityResult HasRoomForItem(const FInv_ItemManifest& Manifest);
+	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_InventoryItem* Item, const int32 StackAmountOverride = -1);
+	FInv_SlotAvailabilityResult HasRoomForItem(const FInv_ItemManifest& Manifest, const int32 StackAmountOverride = -1);
 
 	bool MatchesCategory(const UInv_InventoryItem* Item) const;
 	void AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem);
@@ -75,6 +77,7 @@ private:
 	bool IsRightClick(const FPointerEvent& MouseEvent) const;
 	bool IsLeftClick(const FPointerEvent& MouseEvent)const;
 	void PickUp(UInv_InventoryItem* ClickedInventoryItem, const int32 GridIndex);
+	void PutHoverItemBack();
 
 	void AssignHoverItem(UInv_InventoryItem* InventoryItem,const int32 GridIndex, const int32 PreviousGridIndex);
 	void RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, const int32 GridIndex);
@@ -142,6 +145,9 @@ private:
 	void OnPopUpMenuDrop(int32 Index);
 	UFUNCTION()
 	void OnPopUpMenuConsume(int32 Index);
+	
+	UFUNCTION()
+	void OnInventoryMenuToggled(bool bOpen);
 
 	
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;

@@ -60,6 +60,7 @@ void UInv_InventoryComponent::ToggleInventoryMenu()
 	{
 		OpenInventoryMenu();
 	}
+	OnInventoryMenuToggled.Broadcast(bInventoryMenuOpen);
 }
 
 void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount)
