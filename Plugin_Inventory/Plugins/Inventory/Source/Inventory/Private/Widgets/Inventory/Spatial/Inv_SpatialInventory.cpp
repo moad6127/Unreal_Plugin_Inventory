@@ -284,8 +284,7 @@ void UInv_SpatialInventory::EquippedGridSlotClicked(UInv_EquippedGridSlot* Equip
 		TileSize
 	);
 	EquippedSlottedItem->OnEquippeedSlottedItemClicked.AddDynamic(this, &UInv_SpatialInventory::EquippedSlottedItemClicked);
-	// HoverItem을 Clear하기
-	Grid_Equippable->ClearHoverItem();
+
 	// 아이템을 Equip한것을 서버에 알리기(멀티플레이전용)(Unequip도 같은 것으로)
 	UInv_InventoryComponent* InventoryComponent = UInv_InventoryStatics::GetInventoryComponent(GetOwningPlayer());
 	check(IsValid(InventoryComponent));
@@ -295,6 +294,9 @@ void UInv_SpatialInventory::EquippedGridSlotClicked(UInv_EquippedGridSlot* Equip
 	{
 		InventoryComponent->OnItemEquip.Broadcast(HoverItem->GetInventoryItem());
 	}
+
+	// HoverItem을 Clear하기
+	Grid_Equippable->ClearHoverItem();
 }
 
 void UInv_SpatialInventory::EquippedSlottedItemClicked(UInv_EquippedSlottedItem* SlottedItem)

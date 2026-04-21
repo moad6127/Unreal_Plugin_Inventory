@@ -242,6 +242,7 @@ public:
 	void OnEquip(APlayerController* PC);
 	void OnUnequip(APlayerController* PC);
 	virtual void Assimilate(UInv_CompositeBase* Composite) const override;
+	virtual void Manifest() override;
 
 	bool bEquipped = false;
 
