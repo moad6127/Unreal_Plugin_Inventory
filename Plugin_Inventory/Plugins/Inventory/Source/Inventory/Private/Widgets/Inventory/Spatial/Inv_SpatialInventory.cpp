@@ -164,11 +164,6 @@ void UInv_SpatialInventory::BroadcastSlotClickedDelegates(UInv_InventoryItem* It
 	check(IsValid(InventoryComp));
 	InventoryComp->Server_EquipSlotClicked(ItemToEquip, ItemToUnequip);
 
-	if (GetOwningPlayer()->GetNetMode() != NM_DedicatedServer)
-	{
-		InventoryComp->OnItemEquip.Broadcast(ItemToEquip);
-		InventoryComp->OnItemUnequip.Broadcast(ItemToUnequip);
-	}
 }
 
 FInv_SlotAvailabilityResult UInv_SpatialInventory::HasRoomForItem(UInv_ItemComponent* ItemComponent) const
@@ -290,10 +285,6 @@ void UInv_SpatialInventory::EquippedGridSlotClicked(UInv_EquippedGridSlot* Equip
 	check(IsValid(InventoryComponent));
 
 	InventoryComponent->Server_EquipSlotClicked(HoverItem->GetInventoryItem(), nullptr);
-	if (GetOwningPlayer()->GetNetMode() != NM_DedicatedServer)
-	{
-		InventoryComponent->OnItemEquip.Broadcast(HoverItem->GetInventoryItem());
-	}
 
 	// HoverItemÀ» ClearÇÏ±â
 	Grid_Equippable->ClearHoverItem();
