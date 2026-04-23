@@ -10,6 +10,11 @@
 #include "Items/Manifest/Inv_ItemManifest.h"
 #include "EquipmentManagement/EquipActor/Inv_EquipActor.h"
 
+void UInv_EquipmentComponent::SetOwningSkeletalMesh(USkeletalMeshComponent* OwningMesh)
+{
+	OwningSkeletalMesh = OwningMesh;
+}
+
 void UInv_EquipmentComponent::BeginPlay()
 {
 	Super::BeginPlay();
