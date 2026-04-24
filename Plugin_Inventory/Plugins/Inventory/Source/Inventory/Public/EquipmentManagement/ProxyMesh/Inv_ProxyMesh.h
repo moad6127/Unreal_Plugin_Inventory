@@ -20,6 +20,10 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	void DelayedInitializeOwner();
+	void DelayedInitializtion();
+
+	FTimerHandle TimerForNextTick;
 
 	/*플레이어가 Controll하는 Mesh*/
 	TWeakObjectPtr<USkeletalMeshComponent> SourceMesh;

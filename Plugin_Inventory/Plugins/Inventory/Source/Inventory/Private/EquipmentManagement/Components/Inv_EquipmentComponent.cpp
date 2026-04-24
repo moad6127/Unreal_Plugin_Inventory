@@ -15,6 +15,15 @@ void UInv_EquipmentComponent::SetOwningSkeletalMesh(USkeletalMeshComponent* Owni
 	OwningSkeletalMesh = OwningMesh;
 }
 
+void UInv_EquipmentComponent::InitializeOwner(APlayerController* PlayerController)
+{
+	if (IsValid(PlayerController))
+	{
+		OwningPlayerController = PlayerController;
+	}
+	InitInventoryComponent();
+}
+
 void UInv_EquipmentComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -109,8 +118,11 @@ void UInv_EquipmentComponent::OnItemEquippd(UInv_InventoryItem* EquippedItem)
 	{
 		return;
 	}
+	if (!bIsProxy)
+	{
+		EquipmentFragment->OnEquip(OwningPlayerController.Get());
+	}
 
-	EquipmentFragment->OnEquip(OwningPlayerController.Get());
 	if (!OwningSkeletalMesh.IsValid())
 	{
 		return;
@@ -137,8 +149,10 @@ void UInv_EquipmentComponent::OnItemUnequippd(UInv_InventoryItem* UnequippedItem
 	{
 		return;
 	}
-
-	EquipmentFragment->OnUnequip(OwningPlayerController.Get());
+	if (!bIsProxy)
+	{
+		EquipmentFragment->OnUnequip(OwningPlayerController.Get());
+	}
 	RemoveEquippedActor(EquipmentFragment->GetEquipmentType());
 }
 
