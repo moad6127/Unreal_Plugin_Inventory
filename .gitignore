@@ -3,8 +3,18 @@ DerivedDataCache
 Intermediate
 Saved
 Build
-Content
-Plugins/Developer/*
+__ExternalActors__
+__ExternalObjects__
+Characters
+Collections
+Developers
+Input
+InventoryAssets
+LevelPrototyping
+ThirdPerson
+Variant_Combat
+Variant_Platforming
+Variant_SideScrolling
 
 .idea/
 *.user
@@ -20,3 +30,7 @@ Plugins/Developer/*
 *.suo
 *.xcodeproj
 *.xcworkspace
+
+
+
+
