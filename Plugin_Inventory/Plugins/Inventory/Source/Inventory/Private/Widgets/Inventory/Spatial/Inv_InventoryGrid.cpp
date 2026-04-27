@@ -732,6 +732,14 @@ void UInv_InventoryGrid::CreateItemPopUp(const int32 GridIndex)
 	{
 		ItemPopUp->CollapseConsumeButton();
 	}
+	if (RightClickedItem->IsEquippable())
+	{
+		//TODO : 아이템 장착을 담당할 함수를 여기에 넣기
+	}
+	else
+	{
+		ItemPopUp->CollapseEquipButton();
+	}
 }
 
 void UInv_InventoryGrid::DropItem()

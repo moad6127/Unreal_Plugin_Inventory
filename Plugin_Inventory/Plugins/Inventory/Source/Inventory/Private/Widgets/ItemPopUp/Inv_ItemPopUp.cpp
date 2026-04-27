@@ -14,6 +14,7 @@ void UInv_ItemPopUp::NativeOnInitialized()
 	Button_Split->OnClicked.AddDynamic(this, &UInv_ItemPopUp::SplitButtonClicked);
 	Button_Drop->OnClicked.AddDynamic(this, &UInv_ItemPopUp::DropButtonClicked);
 	Button_Consume->OnClicked.AddDynamic(this, &UInv_ItemPopUp::ConsumeButtonClicked);
+	Button_Equip->OnClicked.AddDynamic(this, &UInv_ItemPopUp::EquipButtonClicked);
 	Slider_Split->OnValueChanged.AddDynamic(this, &UInv_ItemPopUp::SliderValueChanged);
 
 }
@@ -53,6 +54,11 @@ void UInv_ItemPopUp::ConsumeButtonClicked()
 	}
 }
 
+void UInv_ItemPopUp::EquipButtonClicked()
+{
+
+}
+
 void UInv_ItemPopUp::SliderValueChanged(float Value)
 {
 	Text_SplitAmount->SetText(FText::AsNumber(FMath::Floor(Value)));
@@ -68,6 +74,11 @@ void UInv_ItemPopUp::CollapseSplitButton() const
 void UInv_ItemPopUp::CollapseConsumeButton() const
 {
 	Button_Consume->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UInv_ItemPopUp::CollapseEquipButton() const
+{
+	Button_Equip->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UInv_ItemPopUp::SetSliderParams(const float Max, const float Value) const

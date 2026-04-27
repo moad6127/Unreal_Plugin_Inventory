@@ -34,6 +34,7 @@ public:
 	int32 GetSplitAmount() const;
 	void CollapseSplitButton() const;
 	void CollapseConsumeButton() const;
+	void CollapseEquipButton() const;
 	void SetSliderParams(const float Max, const float Value) const;
 	FVector2D GetBoxSize() const;
 	void SetGridIndex(int32 Index) { GridIndex = Index; }
@@ -50,6 +51,9 @@ private:
 	void ConsumeButtonClicked();
 
 	UFUNCTION()
+	void EquipButtonClicked();
+
+	UFUNCTION()
 	void SliderValueChanged(float Value);
 
 
@@ -62,6 +66,9 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> Button_Consume;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> Button_Equip;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<USlider> Slider_Split;

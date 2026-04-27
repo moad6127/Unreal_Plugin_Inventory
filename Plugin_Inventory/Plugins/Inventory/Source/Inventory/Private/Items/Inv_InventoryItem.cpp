@@ -28,3 +28,8 @@ bool UInv_InventoryItem::IsConsumable() const
 {
 	return GetItemManifest().GetItemCategory() == EInv_ItemCategory::Consumable;
 }
+
+bool UInv_InventoryItem::IsEquippable() const
+{
+	return GetItemManifest().GetItemCategory() == EInv_ItemCategory::Equippable;
+}
