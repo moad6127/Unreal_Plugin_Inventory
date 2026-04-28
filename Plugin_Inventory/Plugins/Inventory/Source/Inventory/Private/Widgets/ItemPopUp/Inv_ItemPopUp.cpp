@@ -56,7 +56,10 @@ void UInv_ItemPopUp::ConsumeButtonClicked()
 
 void UInv_ItemPopUp::EquipButtonClicked()
 {
-
+	if (OnEquip.ExecuteIfBound(GridIndex))
+	{
+		RemoveFromParent();
+	}
 }
 
 void UInv_ItemPopUp::SliderValueChanged(float Value)

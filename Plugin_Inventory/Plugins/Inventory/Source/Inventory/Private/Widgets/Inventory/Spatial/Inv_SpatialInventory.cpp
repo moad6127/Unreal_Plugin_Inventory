@@ -99,12 +99,12 @@ bool UInv_SpatialInventory::CanEquipHoverItem(UInv_EquippedGridSlot* EquippedGri
 		return false;
 	}
 	UInv_InventoryItem* HeldItem = HoverItem->GetInventoryItem();
-
-	return HasHoverItem() &&
-		IsValid(HeldItem) &&
-		!HoverItem->IsStackable() &&
-		HeldItem->GetItemManifest().GetItemCategory() == EInv_ItemCategory::Equippable &&
-		HeldItem->GetItemManifest().GetItemType().MatchesTag(EquipmentTypeTag);
+	bool bHasHoverItem = HasHoverItem();
+	bool bHeldItme = IsValid(HeldItem);
+	bool bNotStackable = !HoverItem->IsStackable();
+	bool bEquipable = HeldItem->GetItemManifest().GetItemCategory() == EInv_ItemCategory::Equippable;
+	bool bEquipmentTypeTag = HeldItem->GetItemManifest().GetItemType().MatchesTag(EquipmentTypeTag);
+	return bHasHoverItem && bHeldItme && bNotStackable && bEquipable && bEquipmentTypeTag;
 }
 
 UInv_EquippedGridSlot* UInv_SpatialInventory::FindSlotWithEquippedItem(UInv_InventoryItem* EquippedItem) const
@@ -112,6 +112,15 @@ UInv_EquippedGridSlot* UInv_SpatialInventory::FindSlotWithEquippedItem(UInv_Inve
 	auto* FoundEquippedGridSlot = EquippedGridSlots.FindByPredicate([EquippedItem](UInv_EquippedGridSlot* GridSlot)
 		{
 			return GridSlot->GetInventoryItem() == EquippedItem;
+		});
+	return FoundEquippedGridSlot ? *FoundEquippedGridSlot : nullptr;
+}
+
+UInv_EquippedGridSlot* UInv_SpatialInventory::FindSlotWithEquipmentTypeTag(const FGameplayTag& EquipmentTypeTag) const
+{
+	auto* FoundEquippedGridSlot = EquippedGridSlots.FindByPredicate([EquipmentTypeTag](UInv_EquippedGridSlot* GridSlot)
+		{
+			return GridSlot->GetEquipmentTypeTag().MatchesTag(EquipmentTypeTag);
 		});
 	return FoundEquippedGridSlot ? *FoundEquippedGridSlot : nullptr;
 }

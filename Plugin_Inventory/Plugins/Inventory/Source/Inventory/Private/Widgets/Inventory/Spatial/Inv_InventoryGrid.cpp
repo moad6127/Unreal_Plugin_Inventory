@@ -734,7 +734,7 @@ void UInv_InventoryGrid::CreateItemPopUp(const int32 GridIndex)
 	}
 	if (RightClickedItem->IsEquippable())
 	{
-		//TODO : 아이템 장착을 담당할 함수를 여기에 넣기
+		ItemPopUp->OnEquip.BindDynamic(this, &UInv_InventoryGrid::OnPopUpMenuEquip);
 	}
 	else
 	{
@@ -917,6 +917,10 @@ void UInv_InventoryGrid::OnGridSlotClicked(int32 GridIndex, const FPointerEvent&
 		return;
 	}
 	if (!CurrentQueryResult.bHasSpace)
+	{
+		return;
+	}
+	if (!IsInGridBounds(ItemDropIndex, HoverItem->GetGridDemensions()))
 	{
 		return;
 	}
@@ -1161,6 +1165,18 @@ void UInv_InventoryGrid::OnPopUpMenuConsume(int32 Index)
 	{
 		RemoveItemFromGrid(RightClickItem, Index);
 	}
+}
+
+void UInv_InventoryGrid::OnPopUpMenuEquip(int32 Index)
+{
+	UInv_InventoryItem* RightClickItem = GridSlots[Index]->GetInventoryItem().Get();
+	if (!IsValid(RightClickItem))
+	{
+		return;
+	}
+	// RightClickItem을 장착하기 위해서 Broadcast로SpatialInventory로 정보를 보낸다
+	// RightClickItem만 보내면 될까?
+
 }
 
 void UInv_InventoryGrid::OnInventoryMenuToggled(bool bOpen)

@@ -34,6 +34,7 @@ FGameplayTag UInv_HoverItem::GetItemType() const
 	return FGameplayTag();
 }
 
+
 void UInv_HoverItem::SetIsStackable(bool bStacks)
 {
 	bIsStackable = bStacks;

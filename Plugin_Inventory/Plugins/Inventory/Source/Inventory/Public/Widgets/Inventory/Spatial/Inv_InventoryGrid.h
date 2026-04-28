@@ -147,6 +147,10 @@ private:
 	void OnPopUpMenuConsume(int32 Index);
 	
 	UFUNCTION()
+	void OnPopUpMenuEquip(int32 Index);
+
+	
+	UFUNCTION()
 	void OnInventoryMenuToggled(bool bOpen);
 
 	

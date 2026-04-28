@@ -61,6 +61,7 @@ private:
 	//Equip
 	bool CanEquipHoverItem(UInv_EquippedGridSlot* EquippedGridSlot, const FGameplayTag& EquipmentTypeTag)const;
 	UInv_EquippedGridSlot* FindSlotWithEquippedItem(UInv_InventoryItem* EquippedItem) const;
+	UInv_EquippedGridSlot* FindSlotWithEquipmentTypeTag(const FGameplayTag& EquipmentTypeTag) const;
 	void ClearSlotOfItem(UInv_EquippedGridSlot* EquippedGridSlot);
 	void RemoveEquippedSlottedItem(UInv_EquippedSlottedItem* EquippedSlottedItem);
 	void MakeEquippedSlottedItem(UInv_EquippedSlottedItem* EquippedSlottedItem, UInv_EquippedGridSlot* EquippedGridSlot, UInv_InventoryItem* ItemToEquip);

@@ -45,6 +45,10 @@ void UInv_EquippedGridSlot::NativeOnMouseLeave(const FPointerEvent& InMouseEvent
 	{
 		return;
 	}
+	if (IsValid(EquippedSlottedItem))
+	{
+		return;
+	}
 	if (HoverItem->GetItemType().MatchesTag(EquipmentTypeTag))
 	{
 		SetUnoccupiedTexture();

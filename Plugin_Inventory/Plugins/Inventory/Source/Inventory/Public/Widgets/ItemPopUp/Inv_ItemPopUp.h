@@ -17,7 +17,7 @@ class USizeBox;
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FPopUpMenuSplit, int32, SplitAmountm, int32, Index);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FPopUpMenuDrop, int32, Index);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FPopUpMenuConsume, int32, Index);
-
+DECLARE_DYNAMIC_DELEGATE_OneParam(FPopUpMenuEquip, int32, Index);
 UCLASS()
 class INVENTORY_API UInv_ItemPopUp : public UUserWidget
 {
@@ -30,6 +30,7 @@ public:
 	FPopUpMenuSplit OnSplit;
 	FPopUpMenuDrop OnDrop;
 	FPopUpMenuConsume OnConsume;
+	FPopUpMenuEquip OnEquip;
 
 	int32 GetSplitAmount() const;
 	void CollapseSplitButton() const;
