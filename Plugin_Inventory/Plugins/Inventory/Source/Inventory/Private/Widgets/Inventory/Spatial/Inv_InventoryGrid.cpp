@@ -576,6 +576,10 @@ void UInv_InventoryGrid::RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, c
 
 void UInv_InventoryGrid::AssignHoverItem(UInv_InventoryItem* InventoryItem)
 {
+	if (!IsValid(InventoryItem))
+	{
+		return;
+	}
 	if (!IsValid(HoverItem))
 	{
 		HoverItem = CreateWidget<UInv_HoverItem>(GetOwningPlayer(), HoverItemClass);
@@ -1176,7 +1180,7 @@ void UInv_InventoryGrid::OnPopUpMenuEquip(int32 Index)
 	}
 	// RightClickItem을 장착하기 위해서 Broadcast로SpatialInventory로 정보를 보낸다
 	// RightClickItem만 보내면 될까?
-
+	EquipButtonClick.Broadcast(RightClickItem,Index);
 }
 
 void UInv_InventoryGrid::OnInventoryMenuToggled(bool bOpen)

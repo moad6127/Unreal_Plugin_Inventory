@@ -24,6 +24,7 @@ class UInv_HoverItem;
 enum class EInv_GridSlotState : uint8;
 class UInv_ItemPopUp;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEquipButtonClick, UInv_InventoryItem*, ClickedItem,int32, Index);
 
 UCLASS()
 class INVENTORY_API UInv_InventoryGrid : public UUserWidget
@@ -46,9 +47,14 @@ public:
 	void ClearHoverItem();
 	void AssignHoverItem(UInv_InventoryItem* InventoryItem);
 	void OnHide();
+	void RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, const int32 GridIndex);
+	void AddItemAtIndex(UInv_InventoryItem* Item, const int32 Index, const bool bStackable, const int32 StackAmount);
+	void UpdateGridSlot(UInv_InventoryItem* NewItem, const int32 Index, bool bStackableItem, const int32 StackAmount);
 
 	UFUNCTION()
 	void AddItem(UInv_InventoryItem* Item);
+
+	FEquipButtonClick EquipButtonClick;
 
 private:
 
@@ -60,10 +66,8 @@ private:
 	void AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem);
 	FVector2D GetDrawSize(const FInv_GridFragment* GridFragment) const;
 	void SetSlottedItemImage(const UInv_SlottedItem* SlottedItem, const FInv_GridFragment* GridFragment, const FInv_ImageFragment* ImageFragment);
-	void AddItemAtIndex(UInv_InventoryItem* Item, const int32 Index, const bool bStackable, const int32 StackAmount);
 	UInv_SlottedItem* CreateSlottedItem(UInv_InventoryItem* Item, const bool bStackable, const int32 StackAmount, const FInv_GridFragment* GridFragment, const FInv_ImageFragment* ImageFragment, const int32 Index);
 	void AddSlottedItemToCanvas(const int32 Index, const FInv_GridFragment* GridFragment, UInv_SlottedItem* SlottedItem) const;;
-	void UpdateGridSlot(UInv_InventoryItem* NewItem, const int32 Index, bool bStackableItem, const int32 StackAmount);
 	bool IsIndexClaimed(const TSet<int32>& CheckIndices, const int32 Index) const;
 	bool HasRoomAtIndex(const UInv_GridSlot* GridSlot, const FIntPoint& Dimensions, const TSet<int32>& CheckedIndices, TSet<int32>& OutTentativelyClaimed, const FGameplayTag& ItemType, const int32 MaxStackSize);
 	bool CheckSlotConstraints(const UInv_GridSlot* GridSlot, const UInv_GridSlot* SubGridSlot, const TSet<int32>& CheckedIndices, const FGameplayTag& ItemType, const int32 MaxStackSize) const;
@@ -80,7 +84,6 @@ private:
 	void PutHoverItemBack();
 
 	void AssignHoverItem(UInv_InventoryItem* InventoryItem,const int32 GridIndex, const int32 PreviousGridIndex);
-	void RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, const int32 GridIndex);
 
 	bool CursorExitedCanvas(const FVector2D& BoundaryPos, const FVector2D& BoundarySize, const FVector2D& Location);
 	void UpdateTileParameters(const FVector2D CanvasPosition, const FVector2D MousePosition);

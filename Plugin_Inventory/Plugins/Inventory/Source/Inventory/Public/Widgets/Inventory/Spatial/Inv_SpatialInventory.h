@@ -52,6 +52,9 @@ private:
 	UFUNCTION()
 	void EquippedSlottedItemClicked(UInv_EquippedSlottedItem* SlottedItem);
 
+	UFUNCTION()
+	void OnEquipButton(UInv_InventoryItem* Item,int32 Index);
+
 	void SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button);
 
 	void DisableButton(UButton* Button);

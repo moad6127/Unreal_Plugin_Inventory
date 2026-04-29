@@ -31,6 +31,8 @@ void UInv_SpatialInventory::NativeOnInitialized()
 	Button_Craftables->OnClicked.AddDynamic(this, &UInv_SpatialInventory::ShowCraftables);
 
 	Grid_Equippable->SetOwningCanvas(CanvasPanel);
+	Grid_Equippable->EquipButtonClick.AddDynamic(this, &UInv_SpatialInventory::OnEquipButton);
+
 	Grid_Consumables->SetOwningCanvas(CanvasPanel);
 	Grid_Craftables->SetOwningCanvas(CanvasPanel);
 
@@ -120,7 +122,7 @@ UInv_EquippedGridSlot* UInv_SpatialInventory::FindSlotWithEquipmentTypeTag(const
 {
 	auto* FoundEquippedGridSlot = EquippedGridSlots.FindByPredicate([EquipmentTypeTag](UInv_EquippedGridSlot* GridSlot)
 		{
-			return GridSlot->GetEquipmentTypeTag().MatchesTag(EquipmentTypeTag);
+			return EquipmentTypeTag.MatchesTag(GridSlot->GetEquipmentTypeTag());
 		});
 	return FoundEquippedGridSlot ? *FoundEquippedGridSlot : nullptr;
 }
@@ -328,6 +330,50 @@ void UInv_SpatialInventory::EquippedSlottedItemClicked(UInv_EquippedSlottedItem*
 	MakeEquippedSlottedItem(SlottedItem, EquippedGridSlot, ItemToEquip);
 	// OnItemEquipped/OnItemUnequipped Broadcast 하기  (from the IC)
 	BroadcastSlotClickedDelegates(ItemToEquip, ItemToUnequip);
+}
+
+void UInv_SpatialInventory::OnEquipButton(UInv_InventoryItem* Item,int32 Index)
+{
+	// EquippedGridSlot을 알기위해서 Item의 tag를 사용해서 GridSlot알아내기
+	FGameplayTag ItemTag = Item->GetItemManifest().GetItemType();
+	UInv_EquippedGridSlot* EquippedGridSlot = FindSlotWithEquipmentTypeTag(ItemTag);
+	if (!IsValid(EquippedGridSlot))
+	{
+		return;
+	}
+	FGameplayTag EquipmentTag = EquippedGridSlot->GetEquipmentTypeTag();
+	UInv_InventoryItem* ItemToUnequip = EquippedGridSlot->GetInventoryItem().IsValid() ? EquippedGridSlot->GetInventoryItem().Get() : nullptr;
+	// 장착할때 이미 장착된게 있으면 해당 아이템을 임시 저장하기
+	if (ItemToUnequip)
+	{
+		//기존의 GridSlot에 저장된 아이템들을 제거하기
+		ClearSlotOfItem(EquippedGridSlot);
+		RemoveEquippedSlottedItem(EquippedGridSlot->GetEquippedSlottedItem());
+	}
+	// UInv_EquippedSlottedItem을 생성한후 장착하기
+	UInv_EquippedSlottedItem* EquippedSlottedItem = EquippedGridSlot->OnItemEquipped(
+		Item,
+		EquipmentTag,
+		GetTileSize()
+	);
+	EquippedSlottedItem->OnEquippeedSlottedItemClicked.AddDynamic(this, &UInv_SpatialInventory::EquippedSlottedItemClicked);
+	EquippedGridSlot->SetEquippedSlottedItem(EquippedSlottedItem);
+	EquippedGridSlot->SetOccupiedTexture();
+	//인벤토리의 아이템 제거하기
+	Grid_Equippable->RemoveItemFromGrid(Item, Index);
+
+	// 아이템을 Equip한것을 서버에 알리기(멀티플레이전용)(Unequip도 같은 것으로)
+	UInv_InventoryComponent* InventoryComponent = UInv_InventoryStatics::GetInventoryComponent(GetOwningPlayer());
+	check(IsValid(InventoryComponent));
+
+	InventoryComponent->Server_EquipSlotClicked(Item, ItemToUnequip);
+	//임시 저장된 아이템을 다시 인벤토리에 넣기
+	//TryAddItem을 하는게 좋은데 이건 ItemComp가 필요해서 Drop에서 사용한 방법으로 해야하나?
+	if (ItemToUnequip)
+	{
+		Grid_Equippable->AddItemAtIndex(ItemToUnequip, Index, ItemToUnequip->IsStackable(), ItemToUnequip->GetTotalStackCount());
+		Grid_Equippable->UpdateGridSlot(ItemToUnequip, Index, ItemToUnequip->IsStackable(), ItemToUnequip->GetTotalStackCount());
+	}
 }
 
 void UInv_SpatialInventory::SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button)
