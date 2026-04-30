@@ -20,6 +20,7 @@
 #include "Blueprint/WidgetTree.h"
 
 #include "Items/Inv_InventoryItem.h"
+#include "Items/Fragments/Inv_ItemFragment.h"
 
  
 void UInv_SpatialInventory::NativeOnInitialized()
@@ -68,6 +69,7 @@ void UInv_SpatialInventory::NativeTick(const FGeometry& InGeometry, float InDelt
 		return;
 	}
 	SetItemDescriptionSizeAndPosition(ItemDescription, CanvasPanel);
+	SetEquippedItemDescriptionSizeAndPosition(ItemDescription, EquippedItemDescription, CanvasPanel);
 }
 
 void UInv_SpatialInventory::SetItemDescriptionSizeAndPosition(UInv_ItemDescription* Description, UCanvasPanel* Canvas) const
@@ -87,6 +89,30 @@ void UInv_SpatialInventory::SetItemDescriptionSizeAndPosition(UInv_ItemDescripti
 	);
 
 	ItemDescriptionCPS->SetPosition(ClampedPosition);
+}
+
+void UInv_SpatialInventory::SetEquippedItemDescriptionSizeAndPosition(UInv_ItemDescription* Description, UInv_ItemDescription* EquippedDescription, UCanvasPanel* Canvas) const
+{
+	UCanvasPanelSlot* ItemDescriptionCPS = UWidgetLayoutLibrary::SlotAsCanvasSlot(Description);
+	UCanvasPanelSlot* EquippedItemDescriptionCPS = UWidgetLayoutLibrary::SlotAsCanvasSlot(EquippedDescription);
+
+	if (!IsValid(ItemDescriptionCPS) || !IsValid(EquippedItemDescriptionCPS))
+	{
+		return;
+	}
+
+	const FVector2D ItemDescriptionSize = Description->GetBoxSize();
+	const FVector2D EquippedItemDescriptionSize = EquippedDescription->GetBoxSize();
+	FVector2D ClampedPosition = UInv_WidgetUtils::GetClampedWidgetPosition(
+		UInv_WidgetUtils::GetWidgetSize(Canvas),
+		ItemDescriptionSize,
+		UWidgetLayoutLibrary::GetMousePositionOnViewport(GetOwningPlayer())
+	);
+	ClampedPosition.X -= EquippedItemDescriptionSize.X * 2.f;
+
+	EquippedItemDescriptionCPS->SetSize(EquippedItemDescriptionSize);
+	EquippedItemDescriptionCPS->SetPosition(ClampedPosition);
+
 }
 
 bool UInv_SpatialInventory::CanEquipHoverItem(UInv_EquippedGridSlot* EquippedGridSlot, const FGameplayTag& EquipmentTypeTag) const
@@ -197,17 +223,25 @@ void UInv_SpatialInventory::OnItemHovered(UInv_InventoryItem* Item)
 {
 	const auto& Manifest = Item->GetItemManifest();
 	UInv_ItemDescription* DescriptionWidget = GetItemDescription();
-	DescriptionWidget->SetVisibility(ESlateVisibility::Collapsed);
-	DescriptionWidget->Collapse();
+	CollapseDescription(DescriptionWidget);
+	CollapseDescription(GetEquippedItemDescription());
+
 
 	GetOwningPlayer()->GetWorldTimerManager().ClearTimer(DescriptionTimer);
+	GetOwningPlayer()->GetWorldTimerManager().ClearTimer(EquippedDescriptionTimer);
 
 	FTimerDelegate DescriptionTimerDelegate;
-	DescriptionTimerDelegate.BindLambda([this,&Manifest, DescriptionWidget]()
+	DescriptionTimerDelegate.BindLambda([this,Item,&Manifest, DescriptionWidget]()
 		{
 			Manifest.AssimilateInventoryFragments(DescriptionWidget);
 			GetItemDescription()->SetVisibility(ESlateVisibility::HitTestInvisible);
+
+			//장착된 아이템을 보여주기
+			FTimerDelegate EquippedDescriptionDelegate;
+			EquippedDescriptionDelegate.BindUObject(this, &UInv_SpatialInventory::ShowEquippedItemDescription,Item);
+			GetOwningPlayer()->GetWorldTimerManager().SetTimer(EquippedDescriptionTimer, EquippedDescriptionDelegate, EquippedDescriptionTimerDelay, false);
 		});
+
 
 	GetOwningPlayer()->GetWorldTimerManager().SetTimer(DescriptionTimer, DescriptionTimerDelegate, DescriptionTimerDelay, false);
 }
@@ -216,6 +250,8 @@ void UInv_SpatialInventory::OnItemUnhovered()
 {
 	GetItemDescription()->SetVisibility(ESlateVisibility::Collapsed);
 	GetOwningPlayer()->GetWorldTimerManager().ClearTimer(DescriptionTimer);
+	GetEquippedItemDescription()->SetVisibility(ESlateVisibility::Collapsed);
+	GetOwningPlayer()->GetWorldTimerManager().ClearTimer(EquippedDescriptionTimer);
 }
 
 UInv_ItemDescription* UInv_SpatialInventory::GetItemDescription()
@@ -226,6 +262,22 @@ UInv_ItemDescription* UInv_SpatialInventory::GetItemDescription()
 		CanvasPanel->AddChild(ItemDescription);
 	}
 	return ItemDescription;
+}
+
+UInv_ItemDescription* UInv_SpatialInventory::GetEquippedItemDescription()
+{
+	if (!IsValid(EquippedItemDescription))
+	{
+		EquippedItemDescription = CreateWidget<UInv_ItemDescription>(GetOwningPlayer(), EquippedItemDescriptionClass);
+		CanvasPanel->AddChild(EquippedItemDescription);
+	}
+	return EquippedItemDescription;
+}
+
+void UInv_SpatialInventory::CollapseDescription(UInv_ItemDescription* Description)
+{
+	Description->SetVisibility(ESlateVisibility::Collapsed);
+	Description->Collapse();
 }
 
 bool UInv_SpatialInventory::HasHoverItem() const
@@ -374,6 +426,45 @@ void UInv_SpatialInventory::OnEquipButton(UInv_InventoryItem* Item,int32 Index)
 		Grid_Equippable->AddItemAtIndex(ItemToUnequip, Index, ItemToUnequip->IsStackable(), ItemToUnequip->GetTotalStackCount());
 		Grid_Equippable->UpdateGridSlot(ItemToUnequip, Index, ItemToUnequip->IsStackable(), ItemToUnequip->GetTotalStackCount());
 	}
+}
+
+void UInv_SpatialInventory::ShowEquippedItemDescription(UInv_InventoryItem* Item)
+{
+	const auto& Manifest = Item->GetItemManifest();
+	const FInv_EquipmentFragment* EquipmentFragment = Manifest.GetFragmentOfType<FInv_EquipmentFragment>();
+	if (!EquipmentFragment)
+	{
+		return;
+	}
+	const FGameplayTag HoveredEquipmentType = EquipmentFragment->GetEquipmentType();
+	auto EquippedGridSlot = EquippedGridSlots.FindByPredicate([Item](const UInv_EquippedGridSlot* GridSlot) 
+		{
+			return GridSlot->GetInventoryItem() == Item;
+		});
+	if (EquippedGridSlot != nullptr)
+	{
+		return;
+	}
+
+	auto FoundEquippedSlot = EquippedGridSlots.FindByPredicate([HoveredEquipmentType](const UInv_EquippedGridSlot* GridSlot)
+		{
+			UInv_InventoryItem* InventoryItem = GridSlot->GetInventoryItem().Get();
+			return IsValid(InventoryItem) ? InventoryItem->GetItemManifest().GetFragmentOfType<FInv_EquipmentFragment>()->GetEquipmentType() == HoveredEquipmentType : false;
+		});
+	UInv_EquippedGridSlot* EquippedSlot = FoundEquippedSlot ? *FoundEquippedSlot : nullptr;
+	if (!IsValid(EquippedSlot))
+	{
+		return;
+	}
+
+	UInv_InventoryItem* EquippedItem = EquippedSlot->GetInventoryItem().Get();
+	if (!IsValid(EquippedItem))
+	{
+		return;
+	}
+	const auto& EquippedItemManifest = EquippedItem->GetItemManifest();
+	UInv_ItemDescription* DescriptionWidget = GetEquippedItemDescription();
+	DescriptionWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
 void UInv_SpatialInventory::SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button)
