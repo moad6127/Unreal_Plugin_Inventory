@@ -108,7 +108,7 @@ void UInv_SpatialInventory::SetEquippedItemDescriptionSizeAndPosition(UInv_ItemD
 		ItemDescriptionSize,
 		UWidgetLayoutLibrary::GetMousePositionOnViewport(GetOwningPlayer())
 	);
-	ClampedPosition.X -= EquippedItemDescriptionSize.X * 2.f;
+	ClampedPosition.X -= EquippedItemDescriptionSize.X;
 
 	EquippedItemDescriptionCPS->SetSize(EquippedItemDescriptionSize);
 	EquippedItemDescriptionCPS->SetPosition(ClampedPosition);
@@ -464,7 +464,9 @@ void UInv_SpatialInventory::ShowEquippedItemDescription(UInv_InventoryItem* Item
 	}
 	const auto& EquippedItemManifest = EquippedItem->GetItemManifest();
 	UInv_ItemDescription* DescriptionWidget = GetEquippedItemDescription();
+
 	DescriptionWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+	EquippedItemManifest.AssimilateInventoryFragments(DescriptionWidget);
 }
 
 void UInv_SpatialInventory::SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button)

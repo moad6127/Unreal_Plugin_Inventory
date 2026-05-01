@@ -107,10 +107,21 @@ void UInv_EquipmentComponent::OnItemEquippd(UInv_InventoryItem* EquippedItem)
 	{
 		return;
 	}
-	if (!OwningPlayerController->HasAuthority())
+	if (bIsProxy)
 	{
-		return;
+		if (!OwningPlayerController->IsLocalController())
+		{
+			return;
+		}
 	}
+	else
+	{
+		if (!OwningPlayerController->HasAuthority())
+		{
+			return;
+		}
+	}
+
 
 	FInv_ItemManifest& ItemManifest = EquippedItem->GetItemManifestMutable();
 	FInv_EquipmentFragment* EquipmentFragment = ItemManifest.GetFragmentOfTypeMutable<FInv_EquipmentFragment>();
@@ -128,7 +139,10 @@ void UInv_EquipmentComponent::OnItemEquippd(UInv_InventoryItem* EquippedItem)
 		return;
 	}
 	AInv_EquipActor* SpawnedEquipActor = SpawnEquippedActor(EquipmentFragment, ItemManifest, OwningSkeletalMesh.Get());
-
+	if (bIsProxy)
+	{
+		SpawnedEquipActor->SetReplicates(false);
+	}
 	EquippedActors.Add(SpawnedEquipActor);
 }
 
@@ -138,9 +152,19 @@ void UInv_EquipmentComponent::OnItemUnequippd(UInv_InventoryItem* UnequippedItem
 	{
 		return;
 	}
-	if (!OwningPlayerController->HasAuthority())
+	if (bIsProxy)
 	{
-		return;
+		if (!OwningPlayerController->IsLocalController())
+		{
+			return;
+		}
+	}
+	else
+	{
+		if (!OwningPlayerController->HasAuthority())
+		{
+			return;
+		}
 	}
 
 	FInv_ItemManifest& ItemManifest = UnequippedItem->GetItemManifestMutable();
