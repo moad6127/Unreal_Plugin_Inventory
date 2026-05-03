@@ -9,19 +9,20 @@ namespace GameItems
 {
 	namespace Equipment
 	{
-		UE_DECLARE_GAMEPLAY_TAG_EXTERN(Weapon);
 		namespace Weapons
 		{
 			UE_DECLARE_GAMEPLAY_TAG_EXTERN(Axe);
 			UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sword);
 
 		}
-		UE_DECLARE_GAMEPLAY_TAG_EXTERN(Cloak);
 		namespace Cloaks
 		{
 			UE_DECLARE_GAMEPLAY_TAG_EXTERN(RedCloak);
+			UE_DECLARE_GAMEPLAY_TAG_EXTERN(BlueCloak);
+			UE_DECLARE_GAMEPLAY_TAG_EXTERN(GreenCloak);
+			UE_DECLARE_GAMEPLAY_TAG_EXTERN(YellowCloak);
+			UE_DECLARE_GAMEPLAY_TAG_EXTERN(DarkGrayCloak);
 		}
-		UE_DECLARE_GAMEPLAY_TAG_EXTERN(Mask);
 		namespace Masks
 		{
 			UE_DECLARE_GAMEPLAY_TAG_EXTERN(SteelMask);

@@ -6,19 +6,20 @@ namespace GameItems
 {
 	namespace Equipment
 	{
-		UE_DEFINE_GAMEPLAY_TAG_COMMENT(Weapon, "GameItems.EquipmentTag.Weapon", "Weapon EquipTag");
 		namespace Weapons
 		{
 			UE_DEFINE_GAMEPLAY_TAG_COMMENT(Axe, "GameItems.Equipment.Weapon.Axe", "Axe");
 			UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sword, "GameItems.Equipment.Weapon.Sword","Sword");
 
 		}
-		UE_DEFINE_GAMEPLAY_TAG_COMMENT(Cloak, "GameItems.EquipmentTag.Cloak", "Cloak EquipTag");
 		namespace Cloaks
 		{
 			UE_DEFINE_GAMEPLAY_TAG_COMMENT(RedCloak,"GameItems.Equipment.Cloaks.RedCloak","RedCloak");
+			UE_DEFINE_GAMEPLAY_TAG_COMMENT(BlueCloak,"GameItems.Equipment.Cloaks.BlueCloak", "BlueCloak");
+			UE_DEFINE_GAMEPLAY_TAG_COMMENT(GreenCloak, "GameItems.Equipment.Cloaks.GreenCloak", "GreenCloak");
+			UE_DEFINE_GAMEPLAY_TAG_COMMENT(YellowCloak, "GameItems.Equipment.Cloaks.YellowCloak", "YellowCloak");
+			UE_DEFINE_GAMEPLAY_TAG_COMMENT(DarkGrayCloak, "GameItems.Equipment.Cloaks.DarkGrayCloak", "DarkGrayCloak");
 		}
-		UE_DEFINE_GAMEPLAY_TAG_COMMENT(Mask, "GameItems.EquipmentTag.Mask", "Mask EquipTag");
 		namespace Masks
 		{
 			UE_DEFINE_GAMEPLAY_TAG_COMMENT(SteelMask,"GameItems.Equipment.Masks.SteelMask", "SteelMask");
