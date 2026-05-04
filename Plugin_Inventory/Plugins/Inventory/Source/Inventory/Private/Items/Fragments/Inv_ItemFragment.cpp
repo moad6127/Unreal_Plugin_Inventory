@@ -220,3 +220,19 @@ void FInv_EquipmentFragment::SetEquippedActor(AInv_EquipActor* EquipActor)
 {
 	EquippedActor = EquipActor;
 }
+
+void FInv_ArmorModifier::OnEquip(APlayerController* PC)
+{
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		5, FColor::Green,
+		FString::Printf(TEXT("Item Equip : Armor increased by :%f"), GetValue()));
+}
+
+void FInv_ArmorModifier::OnUnequip(APlayerController* PC)
+{
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		5, FColor::Red,
+		FString::Printf(TEXT("Item Unequip : Armor Decreased by :%f"), GetValue()));
+}

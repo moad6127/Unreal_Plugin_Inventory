@@ -231,6 +231,17 @@ public:
 private:
 
 };
+USTRUCT(BlueprintType)
+struct FInv_ArmorModifier : public FInv_EquipModifier
+{
+	GENERATED_BODY()
+public:
+	virtual void OnEquip(APlayerController* PC) override;
+	virtual void OnUnequip(APlayerController* PC) override;
+
+private:
+
+};
 
 
 class AInv_EquipActor;

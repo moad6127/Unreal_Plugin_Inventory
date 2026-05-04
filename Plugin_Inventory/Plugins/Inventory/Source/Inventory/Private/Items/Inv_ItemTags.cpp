@@ -23,6 +23,8 @@ namespace GameItems
 		namespace Masks
 		{
 			UE_DEFINE_GAMEPLAY_TAG_COMMENT(SteelMask,"GameItems.Equipment.Masks.SteelMask", "SteelMask");
+			UE_DEFINE_GAMEPLAY_TAG_COMMENT(GreenMask, "GameItems.Equipment.Masks.GreenMask", "GreenMask");
+			UE_DEFINE_GAMEPLAY_TAG_COMMENT(BlueMask, "GameItems.Equipment.Masks.BlueMask", "BlueMask");
 		}
 	}
 
