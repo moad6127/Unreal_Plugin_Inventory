@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "EquipmentManagement/ProxyMesh/Inv_ProxyMesh.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/Viewport.h"
 
 FReply UInv_CharacterDisplay::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {

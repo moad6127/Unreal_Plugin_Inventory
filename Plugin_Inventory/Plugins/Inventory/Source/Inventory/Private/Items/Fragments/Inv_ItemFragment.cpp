@@ -236,3 +236,19 @@ void FInv_ArmorModifier::OnUnequip(APlayerController* PC)
 		5, FColor::Red,
 		FString::Printf(TEXT("Item Unequip : Armor Decreased by :%f"), GetValue()));
 }
+
+void FInv_DamageModifier::OnEquip(APlayerController* PC)
+{
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		5, FColor::Green,
+		FString::Printf(TEXT("Item Equip : Damage Decreased by :%f"), GetValue()));
+}
+
+void FInv_DamageModifier::OnUnequip(APlayerController* PC)
+{
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		5, FColor::Red,
+		FString::Printf(TEXT("Item Unequip : Damage Decreased by :%f"), GetValue()));
+}

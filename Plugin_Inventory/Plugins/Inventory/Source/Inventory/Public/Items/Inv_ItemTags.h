@@ -13,7 +13,7 @@ namespace GameItems
 		{
 			UE_DECLARE_GAMEPLAY_TAG_EXTERN(Axe);
 			UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sword);
-
+			UE_DECLARE_GAMEPLAY_TAG_EXTERN(Knife);
 		}
 		namespace Cloaks
 		{

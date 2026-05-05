@@ -10,6 +10,7 @@ namespace GameItems
 		{
 			UE_DEFINE_GAMEPLAY_TAG_COMMENT(Axe, "GameItems.Equipment.Weapon.Axe", "Axe");
 			UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sword, "GameItems.Equipment.Weapon.Sword","Sword");
+			UE_DEFINE_GAMEPLAY_TAG_COMMENT(Knife, "GameItems.Equipment.Weapon.Knife", "Knife");
 
 		}
 		namespace Cloaks

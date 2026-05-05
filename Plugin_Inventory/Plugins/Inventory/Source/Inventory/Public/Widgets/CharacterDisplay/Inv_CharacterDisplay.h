@@ -9,6 +9,8 @@
 /**
  * 
  */
+class UViewport;
+
 UCLASS()
 class INVENTORY_API UInv_CharacterDisplay : public UUserWidget
 {
@@ -24,6 +26,7 @@ public:
 
 	
 private:
+
 
 	bool bIsDragging = false;
 
