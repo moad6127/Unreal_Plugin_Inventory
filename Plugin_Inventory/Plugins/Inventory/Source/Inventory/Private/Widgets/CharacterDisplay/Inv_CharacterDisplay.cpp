@@ -5,7 +5,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "EquipmentManagement/ProxyMesh/Inv_ProxyMesh.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
-#include "Components/Viewport.h"
+
+
 
 FReply UInv_CharacterDisplay::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
@@ -13,12 +14,20 @@ FReply UInv_CharacterDisplay::NativeOnMouseButtonDown(const FGeometry& InGeometr
 	LastPosition = CurrentPosition;
 
 	bIsDragging = true;
+	if (ProxyMesh.IsValid())
+	{
+		ProxyMesh->CaptureChange(bIsDragging);
+	}
 	return FReply::Handled();
 }
 
 FReply UInv_CharacterDisplay::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	bIsDragging = false;
+	if (ProxyMesh.IsValid())
+	{
+		ProxyMesh->CaptureChange(bIsDragging);
+	}
 	return Super::NativeOnMouseButtonUp(InGeometry,InMouseEvent);
 }
 
@@ -26,6 +35,10 @@ void UInv_CharacterDisplay::NativeOnMouseLeave(const FPointerEvent& InMouseEvent
 {
 	Super::NativeOnMouseLeave(InMouseEvent);
 	bIsDragging = false;
+	if (ProxyMesh.IsValid())
+	{
+		ProxyMesh->CaptureChange(bIsDragging);
+	}
 }
 
 void UInv_CharacterDisplay::NativeOnInitialized()
@@ -39,8 +52,8 @@ void UInv_CharacterDisplay::NativeOnInitialized()
 		return;
 	}
 
-	AInv_ProxyMesh* ProxyMesh = Cast<AInv_ProxyMesh>(Actors[0]);
-	if (!IsValid(ProxyMesh))
+	ProxyMesh = Cast<AInv_ProxyMesh>(Actors[0]);
+	if (!ProxyMesh.IsValid())
 	{
 		return;
 	}
@@ -55,6 +68,7 @@ void UInv_CharacterDisplay::NativeTick(const FGeometry& MyGeometry, float InDelt
 	{
 		return;
 	}
+
 	LastPosition = CurrentPosition;
 	CurrentPosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetOwningPlayer());
 

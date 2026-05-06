@@ -144,6 +144,7 @@ void UInv_EquipmentComponent::OnItemEquippd(UInv_InventoryItem* EquippedItem)
 		SpawnedEquipActor->SetReplicates(false);
 	}
 	EquippedActors.Add(SpawnedEquipActor);
+	OnEquipmentChanged.Broadcast();
 }
 
 void UInv_EquipmentComponent::OnItemUnequippd(UInv_InventoryItem* UnequippedItem)
@@ -178,6 +179,7 @@ void UInv_EquipmentComponent::OnItemUnequippd(UInv_InventoryItem* UnequippedItem
 		EquipmentFragment->OnUnequip(OwningPlayerController.Get());
 	}
 	RemoveEquippedActor(EquipmentFragment->GetEquipmentType());
+	OnEquipmentChanged.Broadcast();
 }
 
 

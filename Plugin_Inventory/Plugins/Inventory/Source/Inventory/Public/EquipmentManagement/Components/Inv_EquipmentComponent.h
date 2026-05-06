@@ -15,6 +15,8 @@ struct FInv_EquipmentFragment;
 struct FInv_ItemManifest;
 struct FGameplayTag;
 
+DECLARE_MULTICAST_DELEGATE(FOnEquipmentChanged);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable )
 class INVENTORY_API UInv_EquipmentComponent : public UActorComponent
 {
@@ -25,6 +27,7 @@ public:
 	void SetIsProxy(bool bProxy) { bIsProxy = bProxy; }
 	void InitializeOwner(APlayerController* PlayerController);
 
+	FOnEquipmentChanged OnEquipmentChanged;
 protected:
 	virtual void BeginPlay() override;
 

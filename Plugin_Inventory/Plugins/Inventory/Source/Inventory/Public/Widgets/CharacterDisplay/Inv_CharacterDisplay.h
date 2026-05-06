@@ -10,12 +10,14 @@
  * 
  */
 class UViewport;
+class AInv_ProxyMesh;
 
 UCLASS()
 class INVENTORY_API UInv_CharacterDisplay : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+
 
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -31,6 +33,8 @@ private:
 	bool bIsDragging = false;
 
 	TWeakObjectPtr<USkeletalMeshComponent> Mesh;
+
+	TWeakObjectPtr<AInv_ProxyMesh> ProxyMesh;
 
 	FVector2D CurrentPosition;
 	FVector2D LastPosition;
