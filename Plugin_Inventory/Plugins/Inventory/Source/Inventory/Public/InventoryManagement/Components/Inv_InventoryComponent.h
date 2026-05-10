@@ -31,8 +31,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
 	void TryAddItem(UInv_ItemComponent* ItemComponent);
 
-	void ToggleInventoryMenu();
-
 	UFUNCTION(Server,Reliable)
 	void Server_AddNewItem(UInv_ItemComponent* ItemComponent, int32 StackCount , int32 Remainder);
 	
@@ -51,6 +49,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_EquipSlotClicked(UInv_InventoryItem* ItemToEquip, UInv_InventoryItem* ItemToUnequip);
 
+	void ToggleInventoryMenu();
 
 	void AddRepSubObj(UObject* SubObj);
 	void SpawnDroppedItem(UInv_InventoryItem* Item, int32 StackCount);
