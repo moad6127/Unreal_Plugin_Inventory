@@ -27,7 +27,7 @@
 </details>
 <br/> <br>
 
-
+-----------------------------------------------------
 ## InventoryComponent
 
 Player의 Controller에 Component로 부착되어 사용되는 InventoryComponent로 Inventory기능들을 담당하고 있다.      
@@ -57,6 +57,7 @@ Player의 Controller에 Component로 부착되어 사용되는 InventoryComponen
 ```
 > 아이템의 추가, 버리기, 소비하기 등의 기능을 가지고 있으며 아이템을 저장할수 있는 변수도 가지고 있다.    
 
+### FastArray
 
 ``` C++
 USTRUCT(BlueprintType)
@@ -100,9 +101,38 @@ private:
 - [FastArray h](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Public/InventoryManagement/FastArray/Inv_FastArray.h)      
 - [FastArray C++](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Private/InventoryManagement/FastArray/Inv_FastArray.cpp)
 
-
+---------------------------------------------------------
 ## Inventory
 
+<img width="295" height="402" alt="Image" src="https://github.com/user-attachments/assets/c477dc3d-ebc9-46e4-8a50-e09c7b07adb3" />
+
+### SpatialInventory
+
+인벤토리의 전체적인 틀을 가지고 있고, 여러개의 Grid를 WidgetSwitcher 로 변경할수 있다.     
+
+- [SpatialInventory h](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Public/Widgets/Inventory/Spatial/Inv_SpatialInventory.h)      
+- [SpatialInventory C++](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Private/Widgets/Inventory/Spatial/Inv_SpatialInventory.cpp)
+
+
+### InventoryGrid
+
+### ItemPopUp
+
+### ItemDescription
+
+#### Composite 패턴
+
+------------------------------------------------------
 ## Item
 
+### Item Component
+### ItemManifest
+### ItemFragment
+
+---------------------------------------
 ## Equipment
+
+### EquipmentComponent
+### EquipActor
+### ProxyMesh
+### CharacterDisplay
