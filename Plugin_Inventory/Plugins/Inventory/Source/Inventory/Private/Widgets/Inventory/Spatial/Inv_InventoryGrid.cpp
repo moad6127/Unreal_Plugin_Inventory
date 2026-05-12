@@ -782,6 +782,7 @@ void UInv_InventoryGrid::AddItem(UInv_InventoryItem* Item)
 	AddItemToIndices(Result, Item);
 }
 
+
 void UInv_InventoryGrid::AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem)
 {
 	for (const auto& Availability : Result.SlotAvailabilities)

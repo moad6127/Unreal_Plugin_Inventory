@@ -75,6 +75,7 @@ private:
 	void OpenInventoryMenu();
 	void CloseInventoryMenu();
 
+
 	TWeakObjectPtr<APlayerController> OwningController;
 
 	UPROPERTY(Replicated)
