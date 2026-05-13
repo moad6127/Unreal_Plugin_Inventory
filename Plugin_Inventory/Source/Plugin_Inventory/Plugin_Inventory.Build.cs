@@ -18,7 +18,8 @@ public class Plugin_Inventory : ModuleRules
 			"StateTreeModule",
 			"GameplayStateTreeModule",
 			"UMG",
-			"Slate"
+			"Slate",
+			"Inventory"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });

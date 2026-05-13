@@ -25,6 +25,9 @@ public:
 	bool IsConsumable()const;
 	bool IsEquippable() const;
 
+	void SetItemIndex(int32 Index) { ItemIndex = Index; }
+	int32 GetItemIndex() const { return ItemIndex; }
+
 	int32 GetTotalStackCount() const { return TotalStackCount; }
 	void SetTotalStackCount(int32 Count) { TotalStackCount = Count; }
 private:
@@ -33,6 +36,8 @@ private:
 
 	UPROPERTY(Replicated)
 	int32 TotalStackCount = 0;
+
+	int32 ItemIndex = 0;
 
 };
 

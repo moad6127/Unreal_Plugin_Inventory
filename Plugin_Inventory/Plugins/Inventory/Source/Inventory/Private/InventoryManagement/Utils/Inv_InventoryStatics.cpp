@@ -93,3 +93,13 @@ UInv_InventoryBase* UInv_InventoryStatics::GetInventoryWidget(APlayerController*
 	}
 	return IC->GetInventoryMenu();
 }
+
+int32 UInv_InventoryStatics::GetInventorySaveSlotIndex()
+{
+	return 0;
+}
+
+FString UInv_InventoryStatics::GetInventorySaveSlotName()
+{
+	return TEXT("SaveGame");
+}

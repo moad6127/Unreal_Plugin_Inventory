@@ -21,7 +21,7 @@ struct FItemSaveData
 	int32 StackCount = 0;
 
 	UPROPERTY()
-	FIntPoint ItemLocation = FIntPoint();
+	int32 ItemIndex = 0;
 
 	UPROPERTY()
 	FInv_ItemManifest ItemManifest = FInv_ItemManifest();
@@ -36,7 +36,7 @@ class INVENTORY_API UInv_InventorySave : public USaveGame
 public:
 
 	UPROPERTY()
-	FString SlotName = FString();
+	FString SlotName = FString("SaveGame");
 
 	UPROPERTY()
 	int32 SlotIndex = 0;

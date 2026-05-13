@@ -858,6 +858,7 @@ void UInv_InventoryGrid::UpdateGridSlot(UInv_InventoryItem* NewItem, const int32
 			GridSlot->SetOccupiedTexture();
 			GridSlot->SetAvailable(false);
 		});
+	NewItem->SetItemIndex(Index);
 }
 
 

@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "Plugin_InventoryGameMode.generated.h"
 
+class USaveGame;
+
 /**
  *  Simple GameMode for a third person game
  */
@@ -18,6 +20,12 @@ public:
 	
 	/** Constructor */
 	APlugin_InventoryGameMode();
+
+	void SaveSlotData();
+
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<USaveGame> SaveGameClass;
 };
 
 

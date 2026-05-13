@@ -43,6 +43,10 @@ public:
 	static UInv_HoverItem* GetHoverItem(APlayerController* PC);
 
 	static UInv_InventoryBase* GetInventoryWidget(APlayerController* PC);
+
+	static int32 GetInventorySaveSlotIndex();
+
+	static FString GetInventorySaveSlotName();
 };
 
 template<typename T, typename FuncT>

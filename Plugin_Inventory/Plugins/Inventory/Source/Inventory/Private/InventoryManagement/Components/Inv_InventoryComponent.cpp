@@ -9,6 +9,8 @@
 #include "Items/Inv_InventoryItem.h"
 #include "Items/Fragments/Inv_ItemFragment.h"
 
+#include "Save/Inv_InventorySave.h"
+
 UInv_InventoryComponent::UInv_InventoryComponent() : InventoryList(this)
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -137,6 +139,28 @@ void UInv_InventoryComponent::SpawnDroppedItem(UInv_InventoryItem* Item, int32 S
 		StackableFragment->SetStackCount(StackCount);
 	}
 	ItemManifest.SpawnPickupActor(this, SpawnLocation, SpawnRotation);
+}
+
+void UInv_InventoryComponent::SaveInventoryItems(USaveGame* SaveGame)
+{
+	UInv_InventorySave* InventorySaveData = Cast<UInv_InventorySave>(SaveGame);
+	for (auto Entry : InventoryList.Entries)
+	{
+		FItemSaveData Data;
+		FInv_ItemManifest ItemManifest = Entry.Item->GetItemManifest();
+		Data.ItemIndex = Entry.Item->GetItemIndex();
+		Data.ItemManifest = ItemManifest;
+		//ItemEquip판정하기
+		if (const FInv_EquipmentFragment* EquipmentFragment = ItemManifest.GetFragmentOfType<FInv_EquipmentFragment>())
+		{
+			Data.bEquipped = EquipmentFragment->bEquipped;
+		}	
+		//Item Count저장
+		if (const FInv_StackableFragment* StackableFragment = ItemManifest.GetFragmentOfType<FInv_StackableFragment>())
+		{
+			Data.StackCount = StackableFragment->GetStackCount();
+		}
+	}
 }
 
 void UInv_InventoryComponent::Server_ConsumeItem_Implementation(UInv_InventoryItem* Item)
