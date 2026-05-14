@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Items/Components/Inv_ItemComponent.h"
 #include "Interaction/Inv_Highlightable.h"
+#include "Interaction/Inv_InteractInterface.h"
 #include "InventoryManagement/Components/Inv_InventoryComponent.h"
 
 AInv_PlayerController::AInv_PlayerController()
@@ -77,14 +78,43 @@ void AInv_PlayerController::PrimaryInteract()
 	{
 		return;
 	}
-
-	UInv_ItemComponent* ItemComp = ThisActor->FindComponentByClass<UInv_ItemComponent>();
-	if (!IsValid(ItemComp) ||!InventoryComponent.IsValid())
+	TArray<UActorComponent*> Components = ThisActor->GetComponentsByInterface(UInv_InteractInterface::StaticClass());
+	for (UActorComponent* Component : Components)
 	{
-		return;
+		FInteractionOption Option;
+		if (!IInv_InteractInterface::Execute_Interact(Component, Option))
+		{
+			continue;
+		}
+
+		HandleInteract(Option);
 	}
 
-	InventoryComponent->TryAddItem(ItemComp);
+}
+
+void AInv_PlayerController::HandleInteract(const FInteractionOption& Option)
+{
+	switch (Option.Type)
+	{
+	case EInteractionType::Pickup:
+	{
+		UInv_ItemComponent* ItemComp = Cast<UInv_ItemComponent>(Option.Payload);
+
+		if (!IsValid(ItemComp) || !InventoryComponent.IsValid())
+		{
+			return;
+		}
+
+		InventoryComponent->TryAddItem(ItemComp);
+		break;
+	}
+	case EInteractionType::Save:
+	{
+		break;
+	}
+	default:
+		break;
+	}
 }
 
 void AInv_PlayerController::CreateHUDWidget()
@@ -167,3 +197,5 @@ void AInv_PlayerController::TraceForItem()
 		}
 	}
 }
+
+

@@ -4,18 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Interaction/Inv_InteractInterface.h"
 #include "Items/Manifest/Inv_ItemManifest.h"
 #include "Inv_ItemComponent.generated.h"
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent),Blueprintable )
-class INVENTORY_API UInv_ItemComponent : public UActorComponent
+class INVENTORY_API UInv_ItemComponent : public UActorComponent, public IInv_InteractInterface
 {
 	GENERATED_BODY()
 
 public:	
 	UInv_ItemComponent();
 	virtual void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty >& OutLifetimeProps) const override;
+	virtual bool Interact_Implementation(FInteractionOption& OutOption);
 
 	void InitItemManifest(FInv_ItemManifest CopyOfManifest);
 	FInv_ItemManifest GetItemManifest() const { return ItemManifest; }

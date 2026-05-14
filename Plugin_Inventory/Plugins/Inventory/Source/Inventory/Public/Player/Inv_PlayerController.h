@@ -14,7 +14,7 @@ class UInputMappingContext;
 class UInputAction;
 class UInv_HUDWidget;
 class UInv_InventoryComponent;
-
+struct FInteractionOption;
 
 UCLASS()
 class INVENTORY_API AInv_PlayerController : public APlayerController
@@ -38,6 +38,7 @@ private:
 	void PrimaryInteract();
 	void CreateHUDWidget();
 	void TraceForItem();
+	void HandleInteract(const FInteractionOption& Option);
 
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
 

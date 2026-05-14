@@ -18,6 +18,13 @@ void UInv_ItemComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 	DOREPLIFETIME(ThisClass, ItemManifest);
 }
 
+bool UInv_ItemComponent::Interact_Implementation(FInteractionOption& OutOption)
+{
+	OutOption.Type = EInteractionType::Pickup;
+	OutOption.Payload = this;
+	return true;
+}
+
 void UInv_ItemComponent::InitItemManifest(FInv_ItemManifest CopyOfManifest)
 {
 	ItemManifest = CopyOfManifest;
