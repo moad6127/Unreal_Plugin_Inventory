@@ -4,46 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
-#include "Items/Manifest/Inv_ItemManifest.h"
 #include "Inv_InventorySave.generated.h"
 
 /**
  * 
  */
 
-USTRUCT()
-struct FItemSaveData
-{
-	GENERATED_BODY()
 
-
-	UPROPERTY()
-	int32 StackCount = 0;
-
-	UPROPERTY()
-	int32 ItemIndex = 0;
-
-	UPROPERTY()
-	FInv_ItemManifest ItemManifest = FInv_ItemManifest();
-
-	UPROPERTY()
-	bool bEquipped = false;
-};
 UCLASS()
 class INVENTORY_API UInv_InventorySave : public USaveGame
 {
 	GENERATED_BODY()
 public:
-
-	UPROPERTY()
-	FString SlotName = FString("SaveGame");
-
-	UPROPERTY()
-	int32 SlotIndex = 0;
-
-	UPROPERTY()
-	FString PlayerName = FString("Default Name");
-
-	TArray<FItemSaveData> InventoryItems;
 
 };

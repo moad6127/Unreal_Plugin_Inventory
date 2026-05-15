@@ -27,6 +27,53 @@ void UInv_InventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 	DOREPLIFETIME(ThisClass, InventoryList);
 }
 
+FInventorySaveData UInv_InventoryComponent::SaveInventoryItems() const
+{
+	FInventorySaveData InventorySaveData;
+	for (auto Entry : InventoryList.Entries)
+	{
+		FItemSaveData Data;
+		FInv_ItemManifest ItemManifest = Entry.Item->GetItemManifest();
+		Data.ItemIndex = Entry.Item->GetItemIndex();
+		Data.ItemManifest = ItemManifest;
+		//ItemEquip판정하기
+		if (const FInv_EquipmentFragment* EquipmentFragment = ItemManifest.GetFragmentOfType<FInv_EquipmentFragment>())
+		{
+			Data.bEquipped = EquipmentFragment->bEquipped;
+		}
+		//Item Count저장
+		if (const FInv_StackableFragment* StackableFragment = ItemManifest.GetFragmentOfType<FInv_StackableFragment>())
+		{
+			Data.StackCount = StackableFragment->GetStackCount();
+		}
+		InventorySaveData.InventoryItems.Add(Data);
+	}
+	return InventorySaveData;
+}
+
+void UInv_InventoryComponent::LoadInventoryItems(const FInventorySaveData& Data)
+{
+	//ClearItemList
+
+	for (const FItemSaveData ItemData : Data.InventoryItems)
+	{
+		RestoreInventoryItem(ItemData);
+	}
+}
+
+void UInv_InventoryComponent::RestoreInventoryItem(const FItemSaveData& ItemData)
+{
+	//
+	UInv_InventoryItem* LoadedItem = NewObject<UInv_InventoryItem>(GetOwner(),UInv_InventoryItem::StaticClass());
+	LoadedItem->SetItemIndex(ItemData.ItemIndex);
+	LoadedItem->SetItemManifest(ItemData.ItemManifest);
+	if (GetOwner()->HasAuthority())
+	{
+		OnItemAdded.Broadcast(LoadedItem);
+	}
+}
+
+
 void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 {
 	FInv_SlotAvailabilityResult Result = InventoryMenu->HasRoomForItem(ItemComponent);
@@ -141,27 +188,6 @@ void UInv_InventoryComponent::SpawnDroppedItem(UInv_InventoryItem* Item, int32 S
 	ItemManifest.SpawnPickupActor(this, SpawnLocation, SpawnRotation);
 }
 
-void UInv_InventoryComponent::SaveInventoryItems(USaveGame* SaveGame)
-{
-	UInv_InventorySave* InventorySaveData = Cast<UInv_InventorySave>(SaveGame);
-	for (auto Entry : InventoryList.Entries)
-	{
-		FItemSaveData Data;
-		FInv_ItemManifest ItemManifest = Entry.Item->GetItemManifest();
-		Data.ItemIndex = Entry.Item->GetItemIndex();
-		Data.ItemManifest = ItemManifest;
-		//ItemEquip판정하기
-		if (const FInv_EquipmentFragment* EquipmentFragment = ItemManifest.GetFragmentOfType<FInv_EquipmentFragment>())
-		{
-			Data.bEquipped = EquipmentFragment->bEquipped;
-		}	
-		//Item Count저장
-		if (const FInv_StackableFragment* StackableFragment = ItemManifest.GetFragmentOfType<FInv_StackableFragment>())
-		{
-			Data.StackCount = StackableFragment->GetStackCount();
-		}
-	}
-}
 
 void UInv_InventoryComponent::Server_ConsumeItem_Implementation(UInv_InventoryItem* Item)
 {

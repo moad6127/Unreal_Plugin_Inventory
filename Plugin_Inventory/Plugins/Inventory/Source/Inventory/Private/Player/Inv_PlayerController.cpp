@@ -102,7 +102,7 @@ void AInv_PlayerController::HandleInteract(const FInteractionOption& Option)
 
 		if (!IsValid(ItemComp) || !InventoryComponent.IsValid())
 		{
-			return;
+			break;
 		}
 
 		InventoryComponent->TryAddItem(ItemComp);
@@ -110,6 +110,10 @@ void AInv_PlayerController::HandleInteract(const FInteractionOption& Option)
 	}
 	case EInteractionType::Save:
 	{
+		if (!InventoryComponent.IsValid())
+		{
+			break;
+		}
 		break;
 	}
 	default:

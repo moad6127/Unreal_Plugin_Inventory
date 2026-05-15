@@ -5,12 +5,12 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "InventoryManagement/FastArray/Inv_FastArray.h"
+#include "Save/Inv_InventorySaveTypes.h"
 #include "Inv_InventoryComponent.generated.h"
 
 class UInv_InventoryBase;
 class UInv_InventoryItem;
 class UInv_ItemComponent;
-class USaveGame;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryItemChange, UInv_InventoryItem*, Item);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStackChange, const FInv_SlotAvailabilityResult&, Result);
@@ -56,7 +56,9 @@ public:
 	void SpawnDroppedItem(UInv_InventoryItem* Item, int32 StackCount);
 	UInv_InventoryBase* GetInventoryMenu() const { return InventoryMenu; }
 	bool IsMenuOpen() const { return bInventoryMenuOpen; }
-	void SaveInventoryItems(USaveGame* SaveGame);
+	FInventorySaveData SaveInventoryItems() const;
+	void LoadInventoryItems(const FInventorySaveData& Data);
+	void RestoreInventoryItem(const FItemSaveData& ItemData);
 
 	FInventoryItemChange OnItemAdded;
 	FInventoryItemChange OnItemRemoved;
