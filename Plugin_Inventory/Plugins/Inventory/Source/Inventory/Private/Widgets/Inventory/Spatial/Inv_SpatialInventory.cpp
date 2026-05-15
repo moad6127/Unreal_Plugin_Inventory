@@ -399,8 +399,8 @@ void UInv_SpatialInventory::OnEquipButton(UInv_InventoryItem* Item,int32 Index)
 	if (ItemToUnequip)
 	{
 		//기존의 GridSlot에 저장된 아이템들을 제거하기
-		ClearSlotOfItem(EquippedGridSlot);
 		RemoveEquippedSlottedItem(EquippedGridSlot->GetEquippedSlottedItem());
+		ClearSlotOfItem(EquippedGridSlot);
 	}
 	// UInv_EquippedSlottedItem을 생성한후 장착하기
 	UInv_EquippedSlottedItem* EquippedSlottedItem = EquippedGridSlot->OnItemEquipped(
@@ -412,7 +412,11 @@ void UInv_SpatialInventory::OnEquipButton(UInv_InventoryItem* Item,int32 Index)
 	EquippedGridSlot->SetEquippedSlottedItem(EquippedSlottedItem);
 	EquippedGridSlot->SetOccupiedTexture();
 	//인벤토리의 아이템 제거하기
-	Grid_Equippable->RemoveItemFromGrid(Item, Index);
+	// Index가 -1일경우 Load된 아이템을 단순히 장착하는것이다.
+	if (Index != -1)
+	{
+		Grid_Equippable->RemoveItemFromGrid(Item, Index);
+	}
 
 	// 아이템을 Equip한것을 서버에 알리기(멀티플레이전용)(Unequip도 같은 것으로)
 	UInv_InventoryComponent* InventoryComponent = UInv_InventoryStatics::GetInventoryComponent(GetOwningPlayer());

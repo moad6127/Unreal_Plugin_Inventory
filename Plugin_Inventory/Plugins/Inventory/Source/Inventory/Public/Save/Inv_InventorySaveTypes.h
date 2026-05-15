@@ -27,6 +27,7 @@ struct FItemSaveData
 
 	UPROPERTY()
 	bool bEquipped = false;
+
 };
 
 USTRUCT()

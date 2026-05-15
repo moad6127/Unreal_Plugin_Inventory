@@ -54,6 +54,12 @@ public:
 	UFUNCTION()
 	void AddItem(UInv_InventoryItem* Item);
 
+	UFUNCTION()
+	void LoadedItemAdd(UInv_InventoryItem* Item);
+
+	UFUNCTION()
+	void LoadedItemEquip(UInv_InventoryItem* Item);
+
 	FEquipButtonClick EquipButtonClick;
 
 private:
@@ -151,6 +157,7 @@ private:
 	
 	UFUNCTION()
 	void OnPopUpMenuEquip(int32 Index);
+
 
 	
 	UFUNCTION()

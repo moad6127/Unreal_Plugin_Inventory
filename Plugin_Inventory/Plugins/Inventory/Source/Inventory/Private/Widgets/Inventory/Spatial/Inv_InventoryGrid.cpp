@@ -28,7 +28,8 @@ void UInv_InventoryGrid::NativeOnInitialized()
 	InventoryComponent->OnItemAdded.AddDynamic(this, &UInv_InventoryGrid::AddItem);
 	InventoryComponent->OnStackChange.AddDynamic(this, &UInv_InventoryGrid::AddStacks);
 	InventoryComponent->OnInventoryMenuToggled.AddDynamic(this, &UInv_InventoryGrid::OnInventoryMenuToggled);
-
+	InventoryComponent->OnLoadedItemAdd.AddDynamic(this, &UInv_InventoryGrid::LoadedItemAdd);
+	InventoryComponent->OnLoadedItemEquip.AddDynamic(this, &UInv_InventoryGrid::LoadedItemEquip);
 }
 
 void UInv_InventoryGrid::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -772,6 +773,19 @@ UInv_HoverItem* UInv_InventoryGrid::GetHoverItem() const
 	return HoverItem;
 }
 
+void UInv_InventoryGrid::LoadedItemAdd(UInv_InventoryItem* Item)
+{
+	const FInv_StackableFragment* StackableFragment = Item->GetItemManifest().GetFragmentOfType<FInv_StackableFragment>();
+	int32 StackCount = StackableFragment->GetStackCount();
+	AddItemAtIndex(Item, Item->GetItemIndex(), Item->IsStackable(), StackCount);
+	UpdateGridSlot(Item, Item->GetItemIndex(), Item->IsStackable(), StackCount);
+}
+
+void UInv_InventoryGrid::LoadedItemEquip(UInv_InventoryItem* Item)
+{
+	EquipButtonClick.Broadcast(Item, -1);
+}
+
 void UInv_InventoryGrid::AddItem(UInv_InventoryItem* Item)
 {
 	if (!MatchesCategory(Item))
@@ -781,7 +795,6 @@ void UInv_InventoryGrid::AddItem(UInv_InventoryItem* Item)
 	FInv_SlotAvailabilityResult Result = HasRoomForItem(Item);
 	AddItemToIndices(Result, Item);
 }
-
 
 void UInv_InventoryGrid::AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem)
 {

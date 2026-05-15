@@ -67,8 +67,8 @@ public:
 	FItemEquipStatusChanged OnItemEquip;
 	FItemEquipStatusChanged OnItemUnequip;
 	FInventoryMenuToggled OnInventoryMenuToggled;
-
-
+	FInventoryItemChange OnLoadedItemEquip;
+	FInventoryItemChange OnLoadedItemAdd;
 protected:
 
 	virtual void BeginPlay() override;

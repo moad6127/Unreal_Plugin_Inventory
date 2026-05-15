@@ -9,7 +9,6 @@
 #include "Items/Inv_InventoryItem.h"
 #include "Items/Fragments/Inv_ItemFragment.h"
 
-#include "Save/Inv_InventorySave.h"
 
 UInv_InventoryComponent::UInv_InventoryComponent() : InventoryList(this)
 {
@@ -46,6 +45,7 @@ FInventorySaveData UInv_InventoryComponent::SaveInventoryItems() const
 		{
 			Data.StackCount = StackableFragment->GetStackCount();
 		}
+
 		InventorySaveData.InventoryItems.Add(Data);
 	}
 	return InventorySaveData;
@@ -67,9 +67,17 @@ void UInv_InventoryComponent::RestoreInventoryItem(const FItemSaveData& ItemData
 	UInv_InventoryItem* LoadedItem = NewObject<UInv_InventoryItem>(GetOwner(),UInv_InventoryItem::StaticClass());
 	LoadedItem->SetItemIndex(ItemData.ItemIndex);
 	LoadedItem->SetItemManifest(ItemData.ItemManifest);
+
 	if (GetOwner()->HasAuthority())
 	{
-		OnItemAdded.Broadcast(LoadedItem);
+		if (ItemData.bEquipped)
+		{
+			OnLoadedItemEquip.Broadcast(LoadedItem);
+		}
+		else
+		{
+			OnLoadedItemAdd.Broadcast(LoadedItem);
+		}
 	}
 }
 

@@ -3,7 +3,7 @@
 #include "Plugin_InventoryGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "InventoryManagement/Utils/Inv_InventoryStatics.h"
-#include "Save/Inv_InventorySave.h"
+
 
 
 APlugin_InventoryGameMode::APlugin_InventoryGameMode()
@@ -21,7 +21,5 @@ void APlugin_InventoryGameMode::SaveSlotData()
 		UGameplayStatics::DeleteGameInSlot(SlotName, SlotIndex);
 	}
 	USaveGame* SaveGameObject =	UGameplayStatics::CreateSaveGameObject(SaveGameClass);
-	UInv_InventorySave* InventorySaveGame = Cast<UInv_InventorySave>(SaveGameObject);
 
-	UGameplayStatics::SaveGameToSlot(InventorySaveGame, SlotName, SlotIndex);
 }
