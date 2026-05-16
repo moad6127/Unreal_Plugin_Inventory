@@ -20,12 +20,9 @@ public:
 	
 	/** Constructor */
 	APlugin_InventoryGameMode();
+	virtual void BeginPlay() override;
 
 	void SaveSlotData();
-
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<USaveGame> SaveGameClass;
 };
 
 

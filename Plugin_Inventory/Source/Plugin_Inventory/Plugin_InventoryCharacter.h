@@ -54,6 +54,8 @@ public:
 	/** Constructor */
 	APlugin_InventoryCharacter();	
 
+	//virtual void PossessedBy(AController* NewController) override;
+
 protected:
 
 	/** Initialize input action bindings */

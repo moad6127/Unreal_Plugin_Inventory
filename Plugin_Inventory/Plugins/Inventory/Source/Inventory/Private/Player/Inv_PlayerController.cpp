@@ -82,6 +82,7 @@ void AInv_PlayerController::PrimaryInteract()
 	for (UActorComponent* Component : Components)
 	{
 		FInteractionOption Option;
+		Option.Payload = this;
 		if (!IInv_InteractInterface::Execute_Interact(Component, Option))
 		{
 			continue;

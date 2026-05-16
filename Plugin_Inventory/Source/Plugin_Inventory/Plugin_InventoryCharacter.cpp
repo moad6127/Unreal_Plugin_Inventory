@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Plugin_Inventory.h"
+#include "SaveTest/InventorySaveSubSystemInstance.h"
 
 APlugin_InventoryCharacter::APlugin_InventoryCharacter()
 {
@@ -49,6 +50,8 @@ APlugin_InventoryCharacter::APlugin_InventoryCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
+
+
 
 void APlugin_InventoryCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
