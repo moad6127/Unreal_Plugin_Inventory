@@ -25,6 +25,4 @@ private:
 	UPROPERTY()
 	TObjectPtr<UInventorySave> CachedSaveData;
 
-	UPROPERTY()
-	TSubclassOf<USaveGame> SaveClass;
 };

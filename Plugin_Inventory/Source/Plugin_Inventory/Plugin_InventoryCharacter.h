@@ -54,7 +54,7 @@ public:
 	/** Constructor */
 	APlugin_InventoryCharacter();	
 
-	//virtual void PossessedBy(AController* NewController) override;
+	virtual void PossessedBy(AController* NewController) override;
 
 protected:
 

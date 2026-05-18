@@ -51,6 +51,16 @@ APlugin_InventoryCharacter::APlugin_InventoryCharacter()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
+void APlugin_InventoryCharacter::PossessedBy(AController* NewController)
+{
+	UInventorySaveSubSystemInstance* SubSystem = GetGameInstance()->GetSubsystem<UInventorySaveSubSystemInstance>();
+	APlayerController* PC = Cast<APlayerController>(NewController);
+	if (HasAuthority())
+	{
+		SubSystem->ApplyLoadData(PC);
+	}
+}
+
 
 
 void APlugin_InventoryCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
