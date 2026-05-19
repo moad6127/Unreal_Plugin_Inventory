@@ -26,9 +26,15 @@ void UInventorySaveSubSystemInstance::Save(APlayerController* PC)
 	USaveGame* SaveGameObject = UGameplayStatics::CreateSaveGameObject(Settings->SaveClass);
 	CachedSaveData = Cast<UInventorySave>(SaveGameObject);
 	UInv_InventoryComponent* InventoryComp = UInv_InventoryStatics::GetInventoryComponent(PC);
+	if (!IsValid(InventoryComp))
+	{
+		return;
+	}
 	CachedSaveData->InventoryData = InventoryComp->SaveInventoryItems();
 
 	UGameplayStatics::SaveGameToSlot(CachedSaveData, SlotName, SlotIndex);
+	UE_LOG(LogTemp, Warning, TEXT("Save!"));
+
 }
 
 void UInventorySaveSubSystemInstance::LoadGame()

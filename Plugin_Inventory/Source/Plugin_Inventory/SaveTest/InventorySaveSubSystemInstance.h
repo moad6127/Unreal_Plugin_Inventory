@@ -18,6 +18,7 @@ class PLUGIN_INVENTORY_API UInventorySaveSubSystemInstance : public UGameInstanc
 	GENERATED_BODY()
 
 public:
+	//InventorySave를 테스트하기위해 임시 프로젝트에 만든 함수들
 	void Save(APlayerController* PC);
 	void LoadGame();
 	void ApplyLoadData(APlayerController* PC);

@@ -42,4 +42,7 @@ class INVENTORY_API IInv_InteractInterface
 public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Inventory")
 	bool Interact(FInteractionOption& OutOption);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Inventory")
+	FText GetInfoMessage();
 };

@@ -17,8 +17,8 @@ class INVENTORY_API UInv_ItemComponent : public UActorComponent, public IInv_Int
 public:	
 	UInv_ItemComponent();
 	virtual void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty >& OutLifetimeProps) const override;
-	virtual bool Interact_Implementation(FInteractionOption& OutOption);
-
+	virtual bool Interact_Implementation(FInteractionOption& OutOption) override;
+	
 	void InitItemManifest(FInv_ItemManifest CopyOfManifest);
 	FInv_ItemManifest GetItemManifest() const { return ItemManifest; }
 	FInv_ItemManifest& GetItemManifestMutable() { return ItemManifest; }

@@ -78,18 +78,27 @@ void AInv_PlayerController::PrimaryInteract()
 	{
 		return;
 	}
+	FInteractionOption Option;
+	Option.Payload = this;
 	TArray<UActorComponent*> Components = ThisActor->GetComponentsByInterface(UInv_InteractInterface::StaticClass());
-	for (UActorComponent* Component : Components)
+	if (!Components.IsEmpty())
 	{
-		FInteractionOption Option;
-		Option.Payload = this;
-		if (!IInv_InteractInterface::Execute_Interact(Component, Option))
+		for (UActorComponent* Component : Components)
 		{
-			continue;
+			if (IInv_InteractInterface::Execute_Interact(Component, Option))
+			{
+				break;
+			}
 		}
-
-		HandleInteract(Option);
 	}
+	else
+	{
+		if (ThisActor->Implements<UInv_InteractInterface>())
+		{
+			IInv_InteractInterface::Execute_Interact(ThisActor.Get(), Option);
+		}
+	}
+	HandleInteract(Option);
 
 }
 
@@ -111,10 +120,7 @@ void AInv_PlayerController::HandleInteract(const FInteractionOption& Option)
 	}
 	case EInteractionType::Save:
 	{
-		if (!InventoryComponent.IsValid())
-		{
-			break;
-		}
+
 		break;
 	}
 	default:
