@@ -12,6 +12,7 @@
 #include "InputActionValue.h"
 #include "Plugin_Inventory.h"
 #include "SaveTest/InventorySaveSubSystemInstance.h"
+#include "InventoryManagement/Components/Inv_InventoryComponent.h"
 
 APlugin_InventoryCharacter::APlugin_InventoryCharacter()
 {
@@ -49,16 +50,17 @@ APlugin_InventoryCharacter::APlugin_InventoryCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+
 }
 
 void APlugin_InventoryCharacter::PossessedBy(AController* NewController)
 {
-	UInventorySaveSubSystemInstance* SubSystem = GetGameInstance()->GetSubsystem<UInventorySaveSubSystemInstance>();
-	APlayerController* PC = Cast<APlayerController>(NewController);
-	if (HasAuthority())
-	{
-		SubSystem->ApplyLoadData(PC);
-	}
+	Super::PossessedBy(NewController);
+
+	UInventorySaveSubSystemInstance* SaveSubSystem = GetGameInstance()->GetSubsystem<UInventorySaveSubSystemInstance>();
+	SaveSubSystem->RequestApply(this);
+
 }
 
 

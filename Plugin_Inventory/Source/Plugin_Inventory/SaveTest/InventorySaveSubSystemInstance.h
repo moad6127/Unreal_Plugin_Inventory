@@ -11,7 +11,7 @@
  */
 class UInventorySave;
 class USaveGame;
-
+class UInv_InventoryComponent;
 UCLASS()
 class PLUGIN_INVENTORY_API UInventorySaveSubSystemInstance : public UGameInstanceSubsystem
 {
@@ -22,8 +22,17 @@ public:
 	void Save(APlayerController* PC);
 	void LoadGame();
 	void ApplyLoadData(APlayerController* PC);
+	void RequestApply(ACharacter* Character);
+
+	UFUNCTION()
+	void HandleInventoryCompConstruct(UInv_InventoryComponent* InventoryComp);
 private:
 	UPROPERTY()
 	TObjectPtr<UInventorySave> CachedSaveData;
 
+	UPROPERTY()
+	bool bLoadCompleted = false;
+
+	UPROPERTY()
+	TArray<TWeakObjectPtr<ACharacter>> WaitLoadCharacter;
 };

@@ -17,7 +17,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStackChange, const FInv_SlotAvailab
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FNoRoomInInventory);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemEquipStatusChanged, UInv_InventoryItem*, Item);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryMenuToggled, bool, bOpen);
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryConstruct, UInv_InventoryComponent*, InventoryComp);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) ,Blueprintable)
 class INVENTORY_API UInv_InventoryComponent : public UActorComponent
@@ -59,6 +59,7 @@ public:
 	FInventorySaveData SaveInventoryItems() const;
 	void LoadInventoryItems(const FInventorySaveData& Data);
 	void RestoreInventoryItem(const FItemSaveData& ItemData);
+	bool IsInventoryConstructed() const { return bInventoryConstructed; }
 
 	FInventoryItemChange OnItemAdded;
 	FInventoryItemChange OnItemRemoved;
@@ -69,6 +70,7 @@ public:
 	FInventoryMenuToggled OnInventoryMenuToggled;
 	FInventoryItemChange OnLoadedItemEquip;
 	FInventoryItemChange OnLoadedItemAdd;
+	FInventoryConstruct OnInventoryConstruct;
 protected:
 
 	virtual void BeginPlay() override;
@@ -92,6 +94,8 @@ private:
 	TSubclassOf<UInv_InventoryBase> InventoryMenuClass;
 
 	bool bInventoryMenuOpen = false;
+
+	bool bInventoryConstructed = false;
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	float DropSpawnAngleMin = -85.f;

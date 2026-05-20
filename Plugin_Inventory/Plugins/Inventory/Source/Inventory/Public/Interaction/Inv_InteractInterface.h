@@ -44,5 +44,5 @@ public:
 	bool Interact(FInteractionOption& OutOption);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Inventory")
-	FText GetInfoMessage();
+	FString GetInfoMessage();
 };

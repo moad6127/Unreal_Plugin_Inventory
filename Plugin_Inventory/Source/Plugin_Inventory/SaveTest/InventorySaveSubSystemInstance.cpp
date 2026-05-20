@@ -7,6 +7,7 @@
 #include "SaveTest/InventorySave.h"
 #include "InventoryManagement/Components/Inv_InventoryComponent.h"
 #include "SaveTest/SaveSettings.h"
+#include "GameFramework/Character.h"
 
 void UInventorySaveSubSystemInstance::Save(APlayerController* PC)
 {
@@ -60,11 +61,64 @@ void UInventorySaveSubSystemInstance::LoadGame()
 			UGameplayStatics::SaveGameToSlot(CachedSaveData, SlotName, SlotIndex);
 		}
 	}
+
+	bLoadCompleted = true;
+
+	for (TWeakObjectPtr<ACharacter> Character : WaitLoadCharacter)
+	{
+		if (Character.IsValid())
+		{
+			ApplyLoadData(Cast<APlayerController>(Character->GetController()));
+		}
+	}
+
+	WaitLoadCharacter.Empty();
 }
 
 void UInventorySaveSubSystemInstance::ApplyLoadData(APlayerController* PC)
 {
 	UInv_InventoryComponent* InventoryComp = UInv_InventoryStatics::GetInventoryComponent(PC);
+	if (!IsValid(InventoryComp))
+	{
+		return;
+	}
+	if (!IsValid(CachedSaveData))
+	{
+		return;
+	}
+	if (InventoryComp->IsInventoryConstructed())
+	{
+		InventoryComp->LoadInventoryItems(CachedSaveData->InventoryData);
+	}
+	else
+	{
+		InventoryComp->OnInventoryConstruct.AddDynamic(this, &UInventorySaveSubSystemInstance::HandleInventoryCompConstruct);
+	}
 
-	UE_LOG(LogTemp, Warning, TEXT("InventoryComp : %s"),*InventoryComp->GetName());
+}
+
+void UInventorySaveSubSystemInstance::RequestApply(ACharacter* Character)
+{
+	if (!IsValid(Character))
+	{
+		return;
+	}
+
+	if (bLoadCompleted)
+	{
+		ApplyLoadData(Cast<APlayerController>(Character->GetController()));
+	}
+	else
+	{
+		WaitLoadCharacter.Add(Character);
+	}	
+}
+
+void UInventorySaveSubSystemInstance::HandleInventoryCompConstruct(UInv_InventoryComponent* InventoryComp)
+{
+
+	if (IsValid(InventoryComp) && IsValid(CachedSaveData))
+	{
+		InventoryComp->LoadInventoryItems(CachedSaveData->InventoryData);
+	}
 }

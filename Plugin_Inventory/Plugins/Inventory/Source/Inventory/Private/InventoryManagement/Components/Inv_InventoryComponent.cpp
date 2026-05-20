@@ -67,6 +67,7 @@ void UInv_InventoryComponent::RestoreInventoryItem(const FItemSaveData& ItemData
 	UInv_InventoryItem* LoadedItem = NewObject<UInv_InventoryItem>(GetOwner(),UInv_InventoryItem::StaticClass());
 	LoadedItem->SetItemIndex(ItemData.ItemIndex);
 	LoadedItem->SetItemManifest(ItemData.ItemManifest);
+	InventoryList.AddEntry(LoadedItem);
 
 	if (GetOwner()->HasAuthority())
 	{
@@ -254,6 +255,8 @@ void UInv_InventoryComponent::ConstructInventory()
 	InventoryMenu = CreateWidget<UInv_InventoryBase>(OwningController.Get(), InventoryMenuClass);
 	InventoryMenu->AddToViewport();
 	CloseInventoryMenu();
+	bInventoryConstructed = true;
+	OnInventoryConstruct.Broadcast(this);
 }
 
 void UInv_InventoryComponent::OpenInventoryMenu()
