@@ -55,4 +55,5 @@ private:
 	TArray<TObjectPtr<AInv_EquipActor>> EquippedActors;
 
 	bool bIsProxy = false;
+
 };

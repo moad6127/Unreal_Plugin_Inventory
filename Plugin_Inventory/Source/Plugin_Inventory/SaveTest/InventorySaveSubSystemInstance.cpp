@@ -86,7 +86,7 @@ void UInventorySaveSubSystemInstance::ApplyLoadData(APlayerController* PC)
 	{
 		return;
 	}
-	if (InventoryComp->IsInventoryConstructed())
+	if (InventoryComp->IsInventoryConstructed() && InventoryComp->IsEquipmentConstructed())
 	{
 		InventoryComp->LoadInventoryItems(CachedSaveData->InventoryData);
 	}

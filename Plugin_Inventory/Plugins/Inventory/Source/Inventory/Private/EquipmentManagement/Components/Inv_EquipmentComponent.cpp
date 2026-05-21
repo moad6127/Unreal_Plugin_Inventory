@@ -72,6 +72,28 @@ void UInv_EquipmentComponent::InitInventoryComponent()
 	{
 		InventoryComponent->OnItemUnequip.AddDynamic(this, &UInv_EquipmentComponent::OnItemUnequippd);
 	}
+	if (bIsProxy)
+	{
+		InventoryComponent->SetInitProxyEquipment(true);
+	}
+	else
+	{
+		InventoryComponent->SetInitEquipment(true);
+	}
+
+	if (InventoryComponent->IsProxyEquipmentInit() && InventoryComponent->IsEquipmentInit())
+	{
+		InventoryComponent->SetEquipmentConstructed(true);
+		if (!bIsProxy)
+		{
+			if (InventoryComponent->IsInventoryConstructed())
+			{
+				InventoryComponent->OnInventoryConstruct.Broadcast(InventoryComponent.Get());
+			}
+		}
+	}
+
+
 }
 
 AInv_EquipActor* UInv_EquipmentComponent::SpawnEquippedActor(FInv_EquipmentFragment* EquipmentFragment, const FInv_ItemManifest& Manifest, USkeletalMeshComponent* AttachMesh)

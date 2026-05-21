@@ -110,8 +110,13 @@ UInv_EquippedSlottedItem* UInv_EquippedGridSlot::OnItemEquipped(UInv_InventoryIt
 
 	const float LeftPadding = OverlaySize.X / 2.f - DrawSize.X / 2.f;
 	const float TopPadding = OverlaySize.Y / 2.f - DrawSize.Y / 2.f;
+
 	UOverlaySlot* OverlaySlot = UWidgetLayoutLibrary::SlotAsOverlaySlot(EquippedSlottedItem);
-	OverlaySlot->SetPadding(FMargin(LeftPadding, TopPadding));
+	
+	OverlaySlot->SetHorizontalAlignment(HAlign_Center);
+	OverlaySlot->SetVerticalAlignment(VAlign_Center);
+
+	//OverlaySlot->SetPadding(FMargin(LeftPadding, TopPadding));
 	// 장착된 슬롯형 아이템 위젯 return하기
 	return EquippedSlottedItem;
 }

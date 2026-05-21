@@ -256,7 +256,10 @@ void UInv_InventoryComponent::ConstructInventory()
 	InventoryMenu->AddToViewport();
 	CloseInventoryMenu();
 	bInventoryConstructed = true;
-	OnInventoryConstruct.Broadcast(this);
+	if (bEquipmentConstructed)
+	{
+		OnInventoryConstruct.Broadcast(this);
+	}
 }
 
 void UInv_InventoryComponent::OpenInventoryMenu()

@@ -61,6 +61,14 @@ public:
 	void RestoreInventoryItem(const FItemSaveData& ItemData);
 	bool IsInventoryConstructed() const { return bInventoryConstructed; }
 
+	void SetEquipmentConstructed(bool bConstructed) { bEquipmentConstructed = bConstructed; }
+	bool IsEquipmentConstructed() const { return bEquipmentConstructed; }
+
+	void SetInitProxyEquipment(bool bInit) { bInitProxyEquipment = bInit; }
+	bool IsProxyEquipmentInit() const { return bInitProxyEquipment; }
+	void SetInitEquipment(bool bInit) { bInitEquipment = bInit; }
+	bool IsEquipmentInit() const { return bInitEquipment; }
+
 	FInventoryItemChange OnItemAdded;
 	FInventoryItemChange OnItemRemoved;
 	FNoRoomInInventory NoRoomInInventory;
@@ -96,6 +104,10 @@ private:
 	bool bInventoryMenuOpen = false;
 
 	bool bInventoryConstructed = false;
+	bool bEquipmentConstructed = false;
+
+	bool bInitProxyEquipment = false;
+	bool bInitEquipment = false;
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	float DropSpawnAngleMin = -85.f;
