@@ -188,14 +188,26 @@ void AInv_PlayerController::TraceForItem()
 		{
 			IInv_Highlightable::Execute_Highlight(Highlightable);
 		}
-		UInv_ItemComponent* ItemComp = ThisActor->FindComponentByClass<UInv_ItemComponent>();
-		if (!IsValid(ItemComp))
+		FString InfoMessage = FString();
+		if (ThisActor->Implements<UInv_InteractInterface>())
 		{
-			return;
+			InfoMessage = IInv_InteractInterface::Execute_GetInfoMessage(ThisActor.Get());
+		}
+		else
+		{
+			TArray<UActorComponent*> Components = ThisActor->GetComponentsByInterface(UInv_InteractInterface::StaticClass());
+			if (!Components.IsEmpty())
+			{
+				for (UActorComponent* Component : Components)
+				{
+					InfoMessage = IInv_InteractInterface::Execute_GetInfoMessage(Component);
+					break;
+				}
+			}
 		}
 		if (IsValid(HUDWidget))
 		{
-			HUDWidget->ShowPickupMessage(ItemComp->GetPickupMessage());
+			HUDWidget->ShowPickupMessage(InfoMessage);
 		}
 	}
 

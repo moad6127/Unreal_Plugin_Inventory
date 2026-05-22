@@ -15,9 +15,11 @@ class PLUGIN_INVENTORY_API ASaveActor : public AActor, public IInv_InteractInter
 public:	
 	ASaveActor();
 	virtual bool Interact_Implementation(FInteractionOption& OutOption) override;
+	virtual FString GetInfoMessage_Implementation() override;
 
 protected:
 	virtual void BeginPlay() override;
 
-
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	FString PickupMessage;
 };

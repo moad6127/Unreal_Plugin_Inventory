@@ -18,12 +18,13 @@ public:
 	UInv_ItemComponent();
 	virtual void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty >& OutLifetimeProps) const override;
 	virtual bool Interact_Implementation(FInteractionOption& OutOption) override;
-	
+	virtual FString GetInfoMessage_Implementation() override;
+
 	void InitItemManifest(FInv_ItemManifest CopyOfManifest);
 	FInv_ItemManifest GetItemManifest() const { return ItemManifest; }
 	FInv_ItemManifest& GetItemManifestMutable() { return ItemManifest; }
 
-	FString GetPickupMessage() const { return PickupMessage; }
+
 	void PickedUp();
 protected:
 

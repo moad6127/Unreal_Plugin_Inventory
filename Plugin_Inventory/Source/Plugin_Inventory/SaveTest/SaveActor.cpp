@@ -6,8 +6,8 @@
 
 ASaveActor::ASaveActor()
 {
-	PrimaryActorTick.bCanEverTick = true;
-
+	PrimaryActorTick.bCanEverTick = false;
+	PickupMessage = FString("E - Save Game");
 }
 
 bool ASaveActor::Interact_Implementation(FInteractionOption& OutOption)
@@ -18,6 +18,11 @@ bool ASaveActor::Interact_Implementation(FInteractionOption& OutOption)
 	OutOption.Type = EInteractionType::Save;
 	OutOption.Payload = this;
 	return true;
+}
+
+FString ASaveActor::GetInfoMessage_Implementation()
+{
+	return PickupMessage;
 }
 
 void ASaveActor::BeginPlay()

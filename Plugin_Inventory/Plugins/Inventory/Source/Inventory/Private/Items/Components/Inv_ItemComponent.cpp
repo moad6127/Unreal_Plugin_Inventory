@@ -25,6 +25,11 @@ bool UInv_ItemComponent::Interact_Implementation(FInteractionOption& OutOption)
 	return true;
 }
 
+FString UInv_ItemComponent::GetInfoMessage_Implementation()
+{
+	return PickupMessage;
+}
+
 void UInv_ItemComponent::InitItemManifest(FInv_ItemManifest CopyOfManifest)
 {
 	ItemManifest = CopyOfManifest;
