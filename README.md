@@ -22,6 +22,8 @@
 
  * [Equipment](#Equipment)
 
+ * [InventorySave](#InventorySave)
+
 
 </p>
 </details>
@@ -106,15 +108,113 @@ private:
 
 <img width="295" height="402" alt="Image" src="https://github.com/user-attachments/assets/c477dc3d-ebc9-46e4-8a50-e09c7b07adb3" />
 
+저장된 아이템을 UI로 표시할수 있도록 Widget으로 구성된 인벤토리들이 있다.      
+따로 컨트롤러를 두어서 만들지 않고 각각의 Widget들의 클래스에서 함수를 만들어서 동작하도록 만들었다.       
+
 ### SpatialInventory
 
-인벤토리의 전체적인 틀을 가지고 있고, 여러개의 Grid를 WidgetSwitcher 로 변경할수 있다.     
+인벤토리의 전체적인 틀을 가지고 있고, 여러개의 Grid를 WidgetSwitcher 로 변경할수 있다.       
 
 - [SpatialInventory h](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Public/Widgets/Inventory/Spatial/Inv_SpatialInventory.h)      
 - [SpatialInventory C++](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Private/Widgets/Inventory/Spatial/Inv_SpatialInventory.cpp)
 
 
 ### InventoryGrid
+
+<img width="264" height="168" alt="Image" src="https://github.com/user-attachments/assets/0afe23f7-1186-4cc3-9a7c-c2435df17386" />
+
+- [InventoryGrid h](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Public/Widgets/Inventory/Spatial/Inv_InventoryGrid.h)      
+- [InventoryGrid C++](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Private/Widgets/Inventory/Spatial/Inv_InventoryGrid.cpp)
+
+
+인벤토리에 들어온 아이템들을 표시하는 공간으로 설정된 크기의 형태로 GirdSlot들을 부착시켜서 인벤토리의 형태를 구성했다.        
+크게 3가지 분류인 Equipable,Consumables,Craftables로 나눠서 아이템의 종류에 따라서 저장하는 위치가 다르다.  
+
+```
+construct
+```
+
+```C++
+void UInv_InventoryGrid::ConstructGrid()
+{
+	GridSlots.Reserve(Rows * Columns);
+
+	for (int32 j = 0; j < Rows; j++)
+	{
+		for (int32 i = 0; i < Columns; i++)
+		{
+			UInv_GridSlot* GridSlot = CreateWidget<UInv_GridSlot>(this, GridSlotClass);
+			CanvasPanel->AddChild(GridSlot);
+
+			const FIntPoint TilePosition(i, j);
+			GridSlot->SetTileIndex(UInv_WidgetUtils::GetIndexFromPosition(TilePosition, Columns));
+			
+			UCanvasPanelSlot* GridCPS = UWidgetLayoutLibrary::SlotAsCanvasSlot(GridSlot);
+			GridCPS->SetSize(FVector2D(TileSize));
+			GridCPS->SetPosition(TilePosition * TileSize);
+
+			GridSlots.Add(GridSlot);
+			GridSlot->GridSlotClicked.AddDynamic(this, &UInv_InventoryGrid::OnGridSlotClicked);
+			GridSlot->GridSlotHovered.AddDynamic(this, &UInv_InventoryGrid::OnGridSlotHovered);
+			GridSlot->GridSlotUnHovered.AddDynamic(this, &UInv_InventoryGrid::OnGridSlotUnhovered);
+
+		}
+	}
+}
+```
+> 처음 게임을 시작하여 인벤토리의 내부 공간을 구성할때 호출되는 함수이다.      
+> GridSlot들을 에디터에서 설정된 Row와 Column값으로 붙여 내부 인벤토리를 구성하게 된다.      
+
+```
+AddItem
+```
+```C++
+	// Player가 아이템을 넣을때 InventoryComp에서 아이템의 정보추가해서 이벤트를 보내게 된다.
+	InventoryComponent->OnItemAdded.AddDynamic(this, &UInv_InventoryGrid::AddItem);
+...
+
+void UInv_InventoryGrid::AddItem(UInv_InventoryItem* Item)
+{
+	if (!MatchesCategory(Item))
+	{
+		return;
+	}
+	FInv_SlotAvailabilityResult Result = HasRoomForItem(Item); // 아이템이 들어올 자리가 있는지 확인
+	AddItemToIndices(Result, Item);
+}
+
+void UInv_InventoryGrid::AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem)
+{
+	for (const auto& Availability : Result.SlotAvailabilities)
+	{
+		AddItemAtIndex(NewItem, Availability.Index, Result.bStackable, Availability.AmountToFill); // 아이템 UI를 만들고 추가
+		UpdateGridSlot(NewItem, Availability.Index, Result.bStackable, Availability.AmountToFill); // GridSlot이 점유중인것으로 상태 변경
+	}
+
+}
+
+void UInv_InventoryGrid::AddItemAtIndex(UInv_InventoryItem* Item, const int32 Index, const bool bStackable, const int32 StackAmount)
+{
+	const FInv_GridFragment* GridFragment = GetFragment<FInv_GridFragment>(Item, FragmentTags::GridFragment);
+	const FInv_ImageFragment* ImageFragment = GetFragment<FInv_ImageFragment>(Item, FragmentTags::IconFragment);
+	if (!GridFragment || !ImageFragment)
+	{
+		return;
+	}
+
+	UInv_SlottedItem* SlottedItem = CreateSlottedItem(Item, bStackable, StackAmount, GridFragment, ImageFragment, Index); // Fragment를 사용해서 아이템UI를 생성후 정해진 위치에 넣기
+	AddSlottedItemToCanvas(Index, GridFragment, SlottedItem);
+
+	SlottedItems.Add(Index, SlottedItem);
+}
+```
+
+> 플레이어가 아이템을 획득했을때 InventoryComp에서 넘어온 Data를 바탕으로 UI를 변경해서 아이템을 화면에 표시하도록 만들었다.       
+> 인벤토리에 아이템이 들어올 공간이 있는지 확인한후 아이템을 추가하도록 만들었다.      
+> 에디터에서 설정된 아이템의 크기, 이미지등을 바탕으로 Slotted아이템을 만든후 넣을수 있는 공간에 아이템을 추가한다.        
+
+
+
 
 ### ItemPopUp
 
@@ -136,3 +236,7 @@ private:
 ### EquipActor
 ### ProxyMesh
 ### CharacterDisplay
+
+
+--------------------------------------------
+## InventorySave
