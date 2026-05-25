@@ -218,6 +218,57 @@ void UInv_InventoryGrid::AddItemAtIndex(UInv_InventoryItem* Item, const int32 In
 
 ### ItemPopUp
 
+<img width="238" height="265" alt="ItemPopup" src="https://github.com/user-attachments/assets/15fc72f2-0a03-48cb-88f1-f56ecb8ddf84" />
+
+아이템을 클릭했을때 나오도록 만든 ItemPopup메뉴로 각각 Split, Drop, Consume, Equip창이 존재하며 아이템의 Type에 따라서 보이는 창을 다르게 만들었다.        
+```
+Item Popup Create
+```
+
+```C++
+void UInv_InventoryGrid::CreateItemPopUp(const int32 GridIndex)
+{
+	UInv_InventoryItem* RightClickedItem = GridSlots[GridIndex]->GetInventoryItem().Get();
+
+	...
+
+	const int32 SliderMax = GridSlots[GridIndex]->GetStackCount() - 1;
+	if (RightClickedItem->IsStackable() && SliderMax > 0)
+	{
+		ItemPopUp->OnSplit.BindDynamic(this, &UInv_InventoryGrid::OnPopUpMenuSplit);
+		ItemPopUp->SetSliderParams(SliderMax, FMath::Max(1, GridSlots[GridIndex]->GetStackCount() / 2));
+	}
+	else
+	{
+		ItemPopUp->CollapseSplitButton();
+	}
+
+	ItemPopUp->OnDrop.BindDynamic(this, &UInv_InventoryGrid::OnPopUpMenuDrop);
+	if (RightClickedItem->IsConsumable())
+	{
+		ItemPopUp->OnConsume.BindDynamic(this, &UInv_InventoryGrid::OnPopUpMenuConsume);
+	}
+	else
+	{
+		ItemPopUp->CollapseConsumeButton();
+	}
+	if (RightClickedItem->IsEquippable())
+	{
+		ItemPopUp->OnEquip.BindDynamic(this, &UInv_InventoryGrid::OnPopUpMenuEquip);
+	}
+	else
+	{
+		ItemPopUp->CollapseEquipButton();
+	}
+}
+```
+> 아이템을 클릭하면 해당 함수가 호출이 되고 아이템의 Type에 따라서 Popup에서 보이는 버튼들을 다르게 만들었다.       
+> 각각의 버튼은 해당 기능들과 연동되어 클릭하게 되면 해당 기능이 실행된다.    
+
+
+
+
+
 ### ItemDescription
 
 #### Composite 패턴
