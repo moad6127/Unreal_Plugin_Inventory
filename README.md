@@ -264,9 +264,78 @@ void UInv_InventoryGrid::CreateItemPopUp(const int32 GridIndex)
 ```
 > 아이템을 클릭하면 해당 함수가 호출이 되고 아이템의 Type에 따라서 Popup에서 보이는 버튼들을 다르게 만들었다.       
 > 각각의 버튼은 해당 기능들과 연동되어 클릭하게 되면 해당 기능이 실행된다.    
+> 아이템의 타입에 따라서 해당 기능들은 줄이도록 만들어 사용된다.      
 
+```
+SplitButton
+```
 
+SplitButton이 클릭되면 PopUp에서 설정한 값을 사용해서 분리하게 된다.
+```C++
+void UInv_InventoryGrid::OnPopUpMenuSplit(int32 SplitAmount, int32 Index)
+{
+	UInv_InventoryItem* RightClickedItem = GridSlots[Index]->GetInventoryItem().Get();
+	if (!IsValid(RightClickedItem))
+	{
+		return;
+	}
+	if (!RightClickedItem->IsStackable())
+	{
+		return;
+	}
+	const int32 UpperLeftIndex = GridSlots[Index]->GetUpperLeftIndex();
+	UInv_GridSlot* UpperLeftGridSlot = GridSlots[UpperLeftIndex];
+	const int32 StackCount = UpperLeftGridSlot->GetStackCount();
+	const int32 NewStackCount = StackCount - SplitAmount;
 
+	UpperLeftGridSlot->SetStackCount(NewStackCount);
+	SlottedItems.FindChecked(UpperLeftIndex)->UpdateStackCount(NewStackCount);
+
+	AssignHoverItem(RightClickedItem, UpperLeftIndex, UpperLeftIndex);
+	HoverItem->UpdateStackCount(SplitAmount);
+	
+}
+```
+> 클릭된 아이템과 분리할 개수를 정해서 오게되면 기존의 아이템의 StackCount를 줄이고 새로운 아이템을 HoverItem형태로 분리해서 움직일수 있게 만들었다.       
+
+```
+DropButton
+```
+Drop버튼을 누르게 되면 해당 아이템은 Drop하게 된다.
+
+```C++
+void UInv_InventoryGrid::OnPopUpMenuDrop(int32 Index)
+{
+	UInv_InventoryItem* RightClickedItem = GridSlots[Index]->GetInventoryItem().Get();
+	if (!IsValid(RightClickedItem))
+	{
+		return;
+	}
+
+	PickUp(RightClickedItem, Index);
+	DropItem();
+}
+
+void UInv_InventoryGrid::PickUp(UInv_InventoryItem* ClickedInventoryItem, const int32 GridIndex)
+{
+	//HoverItem연결, Grid에 있는 Clicked아이템제거
+	AssignHoverItem(ClickedInventoryItem, GridIndex, GridIndex);
+	RemoveItemFromGrid(ClickedInventoryItem, GridIndex);
+	// Drop하기위해서 Drop할 아이템을 먼저 Pickup한후 Pickup된 아이템을 Drop하도록 만들었다.
+}
+void UInv_InventoryGrid::DropItem()
+{
+	...
+
+	InventoryComponent->Server_DropItem(HoverItem->GetInventoryItem(), HoverItem->GetStackCount());
+	// Drop은 InventoryComp에서 할수 있도록 만들었다.
+
+	ClearHoverItem();
+	ShowCursor();
+}
+
+```
+> Drop버튼을 누르게 되면 먼저 Drop할 아이템을 Pickup하도록 만들어 HoverItem형태로 변경한뒤 해당 아이템을 Drop하도록 만들었다.
 
 
 ### ItemDescription
