@@ -108,7 +108,6 @@ void FInv_ConsumableFragment::OnConsume(APlayerController* PC)
 	{
 		auto& ModRef = Modifire.GetMutable();
 		ModRef.OnConsume(PC);
-
 	}
 }
 

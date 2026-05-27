@@ -337,6 +337,104 @@ void UInv_InventoryGrid::DropItem()
 ```
 > Drop버튼을 누르게 되면 먼저 Drop할 아이템을 Pickup하도록 만들어 HoverItem형태로 변경한뒤 해당 아이템을 Drop하도록 만들었다.
 
+```
+Consume Button
+```
+Consume 버튼을 누르게되면 해당 아이템을 소비하게 되며 설정되어있는 동작이 작동하게 된다.
+
+```C++
+void UInv_InventoryGrid::OnPopUpMenuConsume(int32 Index)
+{
+	...
+	// 기존 Stack에서 하나를 줄이도록 만든다.
+	const int32 NewStackCount = UpperLeftGridSlot->GetStackCount() - 1;
+
+	UpperLeftGridSlot->SetStackCount(NewStackCount);
+	SlottedItems.FindChecked(UpperLeftIndex)->UpdateStackCount(NewStackCount);
+
+	InventoryComponent->Server_ConsumeItem(RightClickItem);
+
+	// Count가 0이하이면 아이템을 제거한다.
+	if (NewStackCount <= 0)
+	{
+		RemoveItemFromGrid(RightClickItem, Index);
+	}
+}
+
+void UInv_InventoryComponent::Server_ConsumeItem_Implementation(UInv_InventoryItem* Item)
+{
+
+	...
+	if (FInv_ConsumableFragment* ConsumableFragment = Item->GetItemManifestMutable().GetFragmentOfTypeMutable<FInv_ConsumableFragment>())
+	{
+		ConsumableFragment->OnConsume(OwningController.Get());
+	}
+}
+
+// Fragment에서 Consume함수가 호출되며 모든ConsumeModifire 에서 함수가 작동하게된다.
+void FInv_ConsumableFragment::OnConsume(APlayerController* PC)
+{
+	for (TInstancedStruct<FInv_ConsumeModifire>& Modifire : ConsumeModifires)
+	{
+		auto& ModRef = Modifire.GetMutable();
+		ModRef.OnConsume(PC);
+	}
+}
+void FInv_HealthPotionFragment::OnConsume(APlayerController* PC)
+{
+	//PC를 사용해 게임구조에 맞는 Consume사용하기
+	//예를 들어 GAS에서 사용할경우 PC에서 AbilitySystemComp를 가져와 GameplayEffect를 적용시키는 방법등이 있다.
+
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("HealthPotion consumed Healing by :%f"), GetValue()));
+}
+```
+> Consume이 작동하게 되면 아이템의 개수를 한개를 줄이도록 만든후 해당 아이템이 0이하이면 제거하게 된다.     
+> InventoryComponent에서 Server함수인 Consume이 동작하게 되고 해당 아이템의 Fragmemt에서 필요한 동작을 하게 된다.    
+
+```
+EquipButton
+```
+
+Equip버튼을 누르게 되면 해당 아이템을 장착할수 있게 된다.      
+
+```C++
+void UInv_InventoryGrid::OnPopUpMenuEquip(int32 Index)
+{
+	UInv_InventoryItem* RightClickItem = GridSlots[Index]->GetInventoryItem().Get();
+	if (!IsValid(RightClickItem))
+	{
+		return;
+	}
+
+	EquipButtonClick.Broadcast(RightClickItem,Index);
+}
+void UInv_SpatialInventory::OnEquipButton(UInv_InventoryItem* Item,int32 Index)
+{
+
+	...
+	FGameplayTag EquipmentTag = EquippedGridSlot->GetEquipmentTypeTag();
+	UInv_InventoryItem* ItemToUnequip = EquippedGridSlot->GetInventoryItem().IsValid() ? EquippedGridSlot->GetInventoryItem().Get() : nullptr;
+	// 장착할때 이미 장착된게 있으면 해당 아이템을 임시 저장하기
+	if (ItemToUnequip)
+	{
+		//기존의 GridSlot에 저장된 아이템들을 제거하기
+		RemoveEquippedSlottedItem(EquippedGridSlot->GetEquippedSlottedItem());
+		ClearSlotOfItem(EquippedGridSlot);
+	}
+
+	...
+
+	// 아이템을 Equip한것을 서버에 알리기(멀티플레이전용)(Unequip도 같은 것으로)
+	UInv_InventoryComponent* InventoryComponent = UInv_InventoryStatics::GetInventoryComponent(GetOwningPlayer());
+	check(IsValid(InventoryComponent));
+
+	InventoryComponent->Server_EquipSlotClicked(Item, ItemToUnequip);
+	...
+}
+```
+> Equip버튼을 누르게 되면 아이템을 장착하게 된다.
+
+
 
 ### ItemDescription
 
