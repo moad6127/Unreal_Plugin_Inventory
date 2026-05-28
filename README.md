@@ -1,3 +1,4 @@
+
 # Unreal_Plugin_Inventory
 
 
@@ -438,7 +439,83 @@ void UInv_SpatialInventory::OnEquipButton(UInv_InventoryItem* Item,int32 Index)
 
 ### ItemDescription
 
-#### Composite 패턴
+<img width="349" height="257" alt="Image" src="https://github.com/user-attachments/assets/3f2e3394-b433-4771-bbc6-17b6e5757064" />
+<img width="349" height="257" alt="Image" src="https://github.com/user-attachments/assets/f1e48ac2-f6da-4dfb-aac5-2dcb35a1c2ef" />
+
+아이템에 커서를 올려두고 있으면 나타나는 아이템 설명창으로 Composite디자인 패턴과 Item의 Fragment와 결합되어 저장된 데이터가 없을경우 UI로 표시하지 않게 만들었다.
+
+```C++
+void UInv_SpatialInventory::OnItemHovered(UInv_InventoryItem* Item)
+{
+	const auto& Manifest = Item->GetItemManifest();
+	UInv_ItemDescription* DescriptionWidget = GetItemDescription();
+	CollapseDescription(DescriptionWidget);
+	CollapseDescription(GetEquippedItemDescription());
+
+	...
+	FTimerDelegate DescriptionTimerDelegate;
+	DescriptionTimerDelegate.BindLambda([this,Item,&Manifest, DescriptionWidget]()
+		{
+			Manifest.AssimilateInventoryFragments(DescriptionWidget);
+			GetItemDescription()->SetVisibility(ESlateVisibility::HitTestInvisible);
+
+			...
+		});
+		...
+
+}
+
+```
+> 인벤토리 내부의 아이템에 마우스 커서를 가져다가 두면 일정시간이 지난후에 아이템 설명창이 나오도록 만들었다.
+> 각각의 아이템들은 전부 Type과 내부의 기능들이 다르기 때문에 Composite패턴을 사용해서 설정된 값들이 나오도록 만들었다.
+
+#### Description Composite 패턴
+
+CompositeBase를 최상위로 두고 Commposite와 Leaf를 사용해서 클라이언트는 동일한 인터페이스를 사용해서 모든 기능을 사용할수 있도록 만들어진 패턴이다.
+
+```C++
+
+void FInv_ItemManifest::AssimilateInventoryFragments(UInv_CompositeBase* Composite) const
+{
+	const auto& AllInventoryItemFragments = GetAllFragmentOfType<FInv_InventoryItemFragment>();
+	for (const auto* Fragment : AllInventoryItemFragments)
+	{
+		Composite->ApplyFunction([Fragment](UInv_CompositeBase* Widget)
+			{
+				Fragment->Assimilate(Widget);
+			});
+	}
+}
+
+void FInv_InventoryItemFragment::Assimilate(UInv_CompositeBase* Composite) const
+{
+	if (!MatchesWidgetTag(Composite))
+	{
+		return;
+	}
+	Composite->Expand();
+}
+
+void FInv_ImageFragment::Assimilate(UInv_CompositeBase* Composite) const
+{
+	FInv_InventoryItemFragment::Assimilate(Composite);
+	...
+	// DOWORK
+}
+
+void FInv_ConsumableFragment::Assimilate(UInv_CompositeBase* Composite) const
+{
+	...
+	FInv_InventoryItemFragment::Assimilate(Composite);
+	for (const TInstancedStruct<FInv_ConsumeModifire>& Modifire : ConsumeModifires)
+	{
+		const auto& ModRef = Modifire.Get();
+		ModRef.Assimilate(Composite);
+	}
+}
+```
+
+> 이처럼 Description을 보여줄때 InventoryComponent의 AssimilateInventoryFragments함수를 호출해서 패턴기능을 통해 아이템에 설정된 모든 설명들을 표시하도록 만들었다.
 
 ------------------------------------------------------
 ## Item
