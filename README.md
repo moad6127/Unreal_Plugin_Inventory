@@ -520,9 +520,18 @@ void FInv_ConsumableFragment::Assimilate(UInv_CompositeBase* Composite) const
 ------------------------------------------------------
 ## Item
 
+- [Items h](https://github.com/moad6127/Unreal_Plugin_Inventory/tree/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Public/Items)      
+- [Items C++](https://github.com/moad6127/Unreal_Plugin_Inventory/tree/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Private/Items)
+
+인벤토리에 저장될 아이템들의 정보를 담고 있는 것들이다.     
+ 프로젝트에서 아이템으로 사용될 Actor클래스에 ItemComponent를 추가하면 간단하게 인벤토리에 넣을수 있다.    
+
 ### Item Component
+// 인벤토리에 아이템을 추가할수 있도록 하는 Actor에 추가하는 Comp
 ### ItemManifest
+// 아이템들의 정보인 Fragment들을 담고 있는 구조체
 ### ItemFragment
+// 실질적인 아이템들의 Data를 가지고있는 구조체 
 
 ---------------------------------------
 ## Equipment
