@@ -540,7 +540,13 @@ void FInv_ConsumableFragment::Assimilate(UInv_CompositeBase* Composite) const
 
 
 ### ItemManifest
-// 아이템들의 정보인 Fragment들을 담고 있는 구조체
+
+- [Item Component h](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Public/Items/Manifest/Inv_ItemManifest.h)      
+- [Item Component C++](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Private/Items/Manifest/Inv_ItemManifest.cpp)
+
+아이템을 생성하는데 필요한 Data들을 가지고 있는 구조체로 Fragment, ItemType, ItemCategory등을 가지고 인벤토리에 아이템이 들어갈때 가지고 있어야할 Data들을 저장하고 있다.        
+
+
 ### ItemFragment
 // 실질적인 아이템들의 Data를 가지고있는 구조체 
 
