@@ -527,7 +527,18 @@ void FInv_ConsumableFragment::Assimilate(UInv_CompositeBase* Composite) const
  프로젝트에서 아이템으로 사용될 Actor클래스에 ItemComponent를 추가하면 간단하게 인벤토리에 넣을수 있다.    
 
 ### Item Component
-// 인벤토리에 아이템을 추가할수 있도록 하는 Actor에 추가하는 Comp
+
+- [Item Component h](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Public/Items/Components/Inv_ItemComponent.h)      
+- [Item Component C++](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Private/Items/Components/Inv_ItemComponent.cpp)
+
+프로젝트에서 아이템으로 사용되는 Actor에 추가해서 인벤토리 플러그인의 기능들을 사용할수 있게 만들어주는 Component이다.      
+
+<img width="463" height="454" alt="Image" src="https://github.com/user-attachments/assets/e5ab807b-e773-4e10-87df-a929914ea17c" />
+
+> 에디터에서 해당 컴포넌트의 기능들을 설저해서 인벤토리에 필요한 Data들을 저장하고 사용할수 있게 만들어져 있다.          
+> 아이템들에는 단순히 Data만을 담고 있고 수행하는 기능들은 대부분 Widget이나 InventoryComponent에서 수행하고 있다.
+
+
 ### ItemManifest
 // 아이템들의 정보인 Fragment들을 담고 있는 구조체
 ### ItemFragment
