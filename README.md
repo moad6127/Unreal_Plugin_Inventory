@@ -541,14 +541,51 @@ void FInv_ConsumableFragment::Assimilate(UInv_CompositeBase* Composite) const
 
 ### ItemManifest
 
-- [Item Component h](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Public/Items/Manifest/Inv_ItemManifest.h)      
-- [Item Component C++](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Private/Items/Manifest/Inv_ItemManifest.cpp)
+- [ItemManifest h](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Public/Items/Manifest/Inv_ItemManifest.h)      
+- [ItemManifest C++](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Private/Items/Manifest/Inv_ItemManifest.cpp)
 
 아이템을 생성하는데 필요한 Data들을 가지고 있는 구조체로 Fragment, ItemType, ItemCategory등을 가지고 인벤토리에 아이템이 들어갈때 가지고 있어야할 Data들을 저장하고 있다.        
 
 
 ### ItemFragment
-// 실질적인 아이템들의 Data를 가지고있는 구조체 
+
+- [ItemFragment h](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Public/Items/Fragments/Inv_ItemFragment.h)      
+- [ItemFragment C++](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Private/Items/Fragments/Inv_ItemFragment.cpp)
+
+인벤토리와 UI에서 사용할 정보들을 담고 있는 구조체들로 최상위 계층과 그아래 계층들로 이루어져 있다.
+
+
+```
+Sample<Image Fragment>
+```
+
+```C++
+
+/*
+* 인벤토리에 표시할 Image정보를 담기위한 Fragment이다.
+*/
+USTRUCT(BlueprintType)
+struct FInv_ImageFragment : public FInv_InventoryItemFragment
+{
+	GENERATED_BODY()
+
+	UTexture2D* GetIcon()const { return Icon; }
+	virtual void Assimilate(UInv_CompositeBase* Composite) const override;
+private:
+
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	TObjectPtr<UTexture2D> Icon = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	FVector2D IconDimensions{ 44.f,44.f };
+};
+```
+<img width="458" height="138" alt="Image" src="https://github.com/user-attachments/assets/6b6329f4-0fff-4da5-828f-9560b84b624e" />
+
+<img width="284" height="170" alt="Image" src="https://github.com/user-attachments/assets/72e387a6-4685-4939-baee-4190d9387a5e" />
+
+> 인벤토리에서 사용될 Image를 설정하기위한 Fragment로 프로젝트에서 사용할 Actor에 부착할 ItemComponent에서 해당 Fragment를 설정해서 인벤토리의 아이템 이미지를 설정할수 있다.
+
 
 ---------------------------------------
 ## Equipment
