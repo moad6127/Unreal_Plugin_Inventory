@@ -578,13 +578,30 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	FVector2D IconDimensions{ 44.f,44.f };
+
+
+	// 인벤토리에서 아이템의 Image를 설정할때 에디터에서 설정된 ImageFragment를 사용해서 사용하게 된다.
+...
+void UInv_InventoryGrid::SetSlottedItemImage(const UInv_SlottedItem* SlottedItem, const FInv_GridFragment* GridFragment, const FInv_ImageFragment* ImageFragment)
+{
+	FSlateBrush Brush;
+	Brush.SetResourceObject(ImageFragment->GetIcon());
+	Brush.DrawAs = ESlateBrushDrawType::Image;
+	Brush.ImageSize = GetDrawSize(GridFragment);
+	SlottedItem->SetImageBrush(Brush);
+}
+
 };
 ```
-<img width="458" height="138" alt="Image" src="https://github.com/user-attachments/assets/6b6329f4-0fff-4da5-828f-9560b84b624e" />
+<img width="430" height="170" alt="Image" src="https://github.com/user-attachments/assets/6b6329f4-0fff-4da5-828f-9560b84b624e" />
 
 <img width="284" height="170" alt="Image" src="https://github.com/user-attachments/assets/72e387a6-4685-4939-baee-4190d9387a5e" />
 
 > 인벤토리에서 사용될 Image를 설정하기위한 Fragment로 프로젝트에서 사용할 Actor에 부착할 ItemComponent에서 해당 Fragment를 설정해서 인벤토리의 아이템 이미지를 설정할수 있다.
+
+ 이처럼 다양한 Fragment를 사용해서 인벤토리 아이템의 기본 설정값등을 정해 인벤토리 시스템에서 사용할수 있도록 만들었다.
+
+
 
 
 ---------------------------------------
