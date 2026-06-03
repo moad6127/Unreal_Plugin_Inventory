@@ -607,7 +607,20 @@ void UInv_InventoryGrid::SetSlottedItemImage(const UInv_SlottedItem* SlottedItem
 ---------------------------------------
 ## Equipment
 
+
+아이템을 장착하기 위해 필요한 기능들로 장착된 아이템을 보여주기위한 Actor, 인벤토리에서 장착을 확인하기 위해 필요한 Mesh, Component등이 있다.
+
+
 ### EquipmentComponent
+
+- [EquipmentComponent h](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Public/EquipmentManagement/Components/Inv_EquipmentComponent.h)      
+- [EquipmentComponent C++](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Private/EquipmentManagement/Components/Inv_EquipmentComponent.cpp)
+
+이이템을 장착할때 필요한 Component로 인벤토리에서 아이템 장착을 하게되면 해당 Component에서 아이템 장착을 위한 EquipActor소한, 소환된 Actor부착등의 기능을 하게 된다.
+
+```
+```
+
 ### EquipActor
 ### ProxyMesh
 ### CharacterDisplay
