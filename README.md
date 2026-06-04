@@ -619,6 +619,77 @@ void UInv_InventoryGrid::SetSlottedItemImage(const UInv_SlottedItem* SlottedItem
 이이템을 장착할때 필요한 Component로 인벤토리에서 아이템 장착을 하게되면 해당 Component에서 아이템 장착을 위한 EquipActor소한, 소환된 Actor부착등의 기능을 하게 된다.
 
 ```
+Equip
+```
+```C++
+void UInv_SpatialInventory::OnEquipButton(UInv_InventoryItem* Item,int32 Index)
+{
+
+	// 장착이 진행될때 호출되는 함수로 해당 함수를 통해서 인벤토리 내부의 동작을 진행하게 된다.
+	// EquippedGridSlot을 알기위해서 Item의 tag를 사용해서 GridSlot알아내기
+	FGameplayTag ItemTag = Item->GetItemManifest().GetItemType();
+	UInv_EquippedGridSlot* EquippedGridSlot = FindSlotWithEquipmentTypeTag(ItemTag);
+	if (!IsValid(EquippedGridSlot))
+	{
+		return;
+	}
+	FGameplayTag EquipmentTag = EquippedGridSlot->GetEquipmentTypeTag();
+	UInv_InventoryItem* ItemToUnequip = EquippedGridSlot->GetInventoryItem().IsValid() ? EquippedGridSlot->GetInventoryItem().Get() : nullptr;
+	// 장착할때 이미 장착된게 있으면 해당 아이템을 임시 저장하기
+	if (ItemToUnequip)
+	{
+		//기존의 GridSlot에 저장된 아이템들을 제거하기
+		RemoveEquippedSlottedItem(EquippedGridSlot->GetEquippedSlottedItem());
+		ClearSlotOfItem(EquippedGridSlot);
+	}
+	// UInv_EquippedSlottedItem을 생성한후 장착하기
+
+	...
+	if (Index != -1)
+	{
+		Grid_Equippable->RemoveItemFromGrid(Item, Index);
+	}
+
+	// 아이템을 Equip한것을 서버에 알리기(멀티플레이전용)(Unequip도 같은 것으로)
+	UInv_InventoryComponent* InventoryComponent = UInv_InventoryStatics::GetInventoryComponent(GetOwningPlayer());
+	check(IsValid(InventoryComponent));
+
+	// inventoryComponent에 Server함수로 장착이 되었음을 알리고 있다.
+	InventoryComponent->Server_EquipSlotClicked(Item, ItemToUnequip);
+	//임시 저장된 아이템을 다시 인벤토리에 넣기
+	
+	...
+}
+	void UInv_InventoryComponent::Server_EquipSlotClicked_Implementation(UInv_InventoryItem* ItemToEquip, UInv_InventoryItem* ItemToUnequip)
+{
+	Multicast_EquipSlotClicked(ItemToEquip, ItemToUnequip);
+}
+
+void UInv_InventoryComponent::Multicast_EquipSlotClicked_Implementation(UInv_InventoryItem* ItemToEquip, UInv_InventoryItem* ItemToUnequip)
+{
+	// Multicast함수로 장착할 아이템과 장착을 해제할 아이템의 정보를 보내준다.
+	OnItemEquip.Broadcast(ItemToEquip);
+	OnItemUnequip.Broadcast(ItemToUnequip);
+}
+	// EquipmentComponent에서 해당 델리게이트를 바인딩해둔후 Broadcast될시 동작할 함수를 설정한다.
+	if (!InventoryComponent->OnItemEquip.IsAlreadyBound(this, &UInv_EquipmentComponent::OnItemEquippd))
+	{
+		InventoryComponent->OnItemEquip.AddDynamic(this, &UInv_EquipmentComponent::OnItemEquippd);
+	}
+void UInv_EquipmentComponent::OnItemEquippd(UInv_InventoryItem* EquippedItem)
+{
+	...
+
+	//character에 부착할 Actor를 생성한후 부착하게 된다.
+	AInv_EquipActor* SpawnedEquipActor = SpawnEquippedActor(EquipmentFragment, ItemManifest, OwningSkeletalMesh.Get());
+	if (bIsProxy)
+	{
+		SpawnedEquipActor->SetReplicates(false);
+	}
+	EquippedActors.Add(SpawnedEquipActor);
+	OnEquipmentChanged.Broadcast();
+}
+
 ```
 
 ### EquipActor
