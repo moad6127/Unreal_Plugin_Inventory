@@ -691,8 +691,13 @@ void UInv_EquipmentComponent::OnItemEquippd(UInv_InventoryItem* EquippedItem)
 }
 
 ```
+> 아이템을 장착하기위해 동작할경우 인벤토리의 기능을 통해 필요한 작업들을 진행한후 InventoryComp에서 Server와 Multicast함수로 장착을 했음을 알린다.     
+> 해당함수에서의 동작으로 EquipmentComp에서 캐릭터에 부착할 Actor를 생성한후 장착하도록 만든다.
+
 
 ### EquipActor
+아이템을 장착할때 캐릭터클래스에 부착을 위한 Actor로 단순하게 되어있다.     
+에디터에서 해당Actor를 블루프린트로 생성한후 ItemComp에서 장착할때 사용할수 있도록 설정해주면 장착할때 캐릭터에 해당 Actor가 생성되 부착된다.
 ### ProxyMesh
 ### CharacterDisplay
 
