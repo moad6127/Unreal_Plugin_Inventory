@@ -698,9 +698,51 @@ void UInv_EquipmentComponent::OnItemEquippd(UInv_InventoryItem* EquippedItem)
 ### EquipActor
 아이템을 장착할때 캐릭터클래스에 부착을 위한 Actor로 단순하게 되어있다.     
 에디터에서 해당Actor를 블루프린트로 생성한후 ItemComp에서 장착할때 사용할수 있도록 설정해주면 장착할때 캐릭터에 해당 Actor가 생성되 부착된다.
-### ProxyMesh
-### CharacterDisplay
 
+
+### ProxyMesh && CharacterDisplay
+
+<img width="284" height="389" alt="Image" src="https://github.com/user-attachments/assets/2fdf8c8c-d9ea-461c-bce1-ed3fbef50237" />
+
+인벤토리에서 캐릭터가 아이템을 장착한 상태를 보여줄수 있도록 만들어진 UI와 클래스로 아이템을 장착할때 어떤 아이템을 장착했는지 보여주게 된다.
+
+- [ProxyMesh h](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Public/EquipmentManagement/ProxyMesh/Inv_ProxyMesh.h
+)      
+- [ProxyMesh C++](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Private/EquipmentManagement/ProxyMesh/Inv_ProxyMesh.cpp)
+
+```C++
+void UInv_EquipmentComponent::OnItemEquippd(UInv_InventoryItem* EquippedItem)
+{	
+
+	...
+	//아이템을 장착하게 되면 해당 델리게디트에서 장착되었다고 알리게 된다.
+	OnEquipmentChanged.Broadcast();
+}
+
+// 이벤트를 받게 되면 해당 함수가 호출되며 최적화를 위해서 한번만 캡쳐해 보여주게 된다.
+void AInv_ProxyMesh::OnEquipmentChanged()
+{
+	UpdateShowOnlyActors();
+
+	GetWorld()->GetTimerManager().SetTimer(
+		EquipChangedTimer,
+		this,
+		&AInv_ProxyMesh::CaptureOnce,
+		ChangeTime,
+		false);
+
+}
+
+void AInv_ProxyMesh::CaptureOnce()
+{
+	if (CaptureComponent)
+	{
+		CaptureComponent->CaptureScene();
+	}
+}
+
+```
+> 
 
 --------------------------------------------
 ## InventorySave
