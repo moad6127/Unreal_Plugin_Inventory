@@ -700,7 +700,7 @@ void UInv_EquipmentComponent::OnItemEquippd(UInv_InventoryItem* EquippedItem)
 에디터에서 해당Actor를 블루프린트로 생성한후 ItemComp에서 장착할때 사용할수 있도록 설정해주면 장착할때 캐릭터에 해당 Actor가 생성되 부착된다.
 
 
-### ProxyMesh && CharacterDisplay
+### ProxyMesh
 
 <img width="284" height="389" alt="Image" src="https://github.com/user-attachments/assets/2fdf8c8c-d9ea-461c-bce1-ed3fbef50237" />
 
@@ -710,6 +710,61 @@ void UInv_EquipmentComponent::OnItemEquippd(UInv_InventoryItem* EquippedItem)
 )      
 - [ProxyMesh C++](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Private/EquipmentManagement/ProxyMesh/Inv_ProxyMesh.cpp)
 
+
+```
+Init
+```
+```C++
+void AInv_ProxyMesh::DelayedInitializeOwner()
+{
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		DelayedInitializtion();
+		return;
+	}
+
+	APlayerController* PC = World->GetFirstPlayerController();
+	if (!IsValid(PC))
+	{
+		DelayedInitializtion();
+		return;
+	}
+
+	ACharacter* Character = Cast<ACharacter>(PC->GetPawn());
+	if (!IsValid(Character))
+	{
+		DelayedInitializtion();
+		return;
+	}
+	USkeletalMeshComponent* CharacterMesh = Character->GetMesh();
+	if (!IsValid(CharacterMesh))
+	{
+		DelayedInitializtion();
+		return;
+	}
+	SourceMesh = CharacterMesh;
+	Mesh->SetSkeletalMesh(SourceMesh->GetSkeletalMeshAsset());
+	Mesh->SetAnimInstanceClass(SourceMesh->GetAnimInstance()->GetClass());
+
+	EquipmentComponent->InitializeOwner(PC);
+}
+
+void AInv_ProxyMesh::DelayedInitializtion()
+{
+	FTimerDelegate TimerDelegate;
+	TimerDelegate.BindUObject(this, &AInv_ProxyMesh::DelayedInitializeOwner);
+	GetWorld()->GetTimerManager().SetTimerForNextTick(TimerDelegate);
+}
+```
+> 게임이 시작될때 해당 Actor를 초기화하는 함수이다.      
+> Beginplay에서 호출되며 게임에 필요한 변수들이 아직 선언되지 않을경우 NetxTick 타이머을 사용해 하나의 틱이 지난후에 다시 함수를 호출하도록 설정했다.
+
+
+
+```
+아이템 장착할시
+```
 ```C++
 void UInv_EquipmentComponent::OnItemEquippd(UInv_InventoryItem* EquippedItem)
 {	
@@ -742,7 +797,13 @@ void AInv_ProxyMesh::CaptureOnce()
 }
 
 ```
-> 
+> 인벤토리에서 아이템을 장착하게 되면 EquipmentComponent에서 OnEquipmentChanged의 델리게이트가 이벤트를 발송하게 된다.       
+> 해당 이벤트의 대응 함수가 호출이 되고 Timer를 통해서 일정 시간이 지난후에 캐릭터의 아이템 장착을 보여주는 MeshActor의 SceneCaptureComponent 에서 캐릭터를 한번 캡쳐 하게 된다.       
+> 항상 캐릭터를 보여주게 되면 게임의 리소스를 많이 소비 하게 되므로 아이템을 장착할때, Mesh를 움직일때만 캡쳐하도록 하였다.
+
+### CharacterDisplay
+
+// ProxMesh에서의 랜더타겟으로 캡쳐된 모습을 보여주기 위해서 사용되는 UI
 
 --------------------------------------------
 ## InventorySave
