@@ -803,7 +803,11 @@ void AInv_ProxyMesh::CaptureOnce()
 
 ### CharacterDisplay
 
-// ProxMesh에서의 랜더타겟으로 캡쳐된 모습을 보여주기 위해서 사용되는 UI
+- [CharacterDisplay h](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Public/Widgets/CharacterDisplay/Inv_CharacterDisplay.h)      
+- [CharacterDisplay C++](https://github.com/moad6127/Unreal_Plugin_Inventory/blob/master/Plugin_Inventory/Plugins/Inventory/Source/Inventory/Private/Widgets/CharacterDisplay/Inv_CharacterDisplay.cpp)
+
+ProxMesh에서의 랜더타겟으로 캡쳐된 모습을 보여주기 위해서 사용되는 UI로 인벤토리내에 존재한다.       
+
 
 --------------------------------------------
 ## InventorySave
