@@ -809,5 +809,62 @@ void AInv_ProxyMesh::CaptureOnce()
 ProxMesh에서의 랜더타겟으로 캡쳐된 모습을 보여주기 위해서 사용되는 UI로 인벤토리내에 존재한다.       
 
 
+```
+Mouse Click
+```
+
+```C++
+void UInv_CharacterDisplay::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+	if (!bIsDragging)
+	{
+		return;
+	}
+
+	LastPosition = CurrentPosition;
+	CurrentPosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetOwningPlayer());
+
+	const float HorizontalDelta = LastPosition.X - CurrentPosition.X;
+	if (!Mesh.IsValid())
+	{
+		return;
+	}
+	Mesh->AddRelativeRotation(FRotator(0.f, HorizontalDelta, 0.f));
+}
+
+FReply UInv_CharacterDisplay::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	CurrentPosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetOwningPlayer());
+	LastPosition = CurrentPosition;
+
+	bIsDragging = true;
+	if (ProxyMesh.IsValid())
+	{
+		ProxyMesh->CaptureChange(bIsDragging);
+	}
+	return FReply::Handled();
+}
+
+FReply UInv_CharacterDisplay::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	bIsDragging = false;
+	if (ProxyMesh.IsValid())
+	{
+		ProxyMesh->CaptureChange(bIsDragging);
+	}
+	return Super::NativeOnMouseButtonUp(InGeometry,InMouseEvent);
+}
+
+void AInv_ProxyMesh::CaptureChange(bool IsDragging)
+{
+	CaptureComponent->bCaptureEveryFrame = IsDragging;
+}
+
+```
+> characterDisplay 위젯을 마우스로 클릭중일경우 Bool타입 변수를 설정한후 마우스의 방향에 따라서 CharacterMesh를 움직이도록 만들었다.    
+> ButtonDown일때 bool타입을 true로 변경한후 마우스 클릭위치를 얻어 현재 위치로 저장하게 만든후, 마우스의 움직임에 따라서 Tick에서 CharacterMesh를 움직이게 만든다.    
+>  ButtonUp을 경우 bool타입변수를 false로 변경한후 렌더타겟의 캡쳐를 멈추게 만들었다.
+
 --------------------------------------------
 ## InventorySave
