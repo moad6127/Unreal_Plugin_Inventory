@@ -826,10 +826,8 @@ void UInv_CharacterDisplay::NativeTick(const FGeometry& MyGeometry, float InDelt
 	CurrentPosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetOwningPlayer());
 
 	const float HorizontalDelta = LastPosition.X - CurrentPosition.X;
-	if (!Mesh.IsValid())
-	{
-		return;
-	}
+
+	...
 	Mesh->AddRelativeRotation(FRotator(0.f, HorizontalDelta, 0.f));
 }
 
@@ -860,6 +858,7 @@ void AInv_ProxyMesh::CaptureChange(bool IsDragging)
 {
 	CaptureComponent->bCaptureEveryFrame = IsDragging;
 }
+...
 
 ```
 > characterDisplay 위젯을 마우스로 클릭중일경우 Bool타입 변수를 설정한후 마우스의 방향에 따라서 CharacterMesh를 움직이도록 만들었다.    
@@ -868,3 +867,7 @@ void AInv_ProxyMesh::CaptureChange(bool IsDragging)
 
 --------------------------------------------
 ## InventorySave
+
+// InventoryComp에서 Save,Load한다.
+// 게임의 초기화가 된다음에 해야하기때문에 워크플로를 잘 맞춰야 한다.
+
