@@ -868,6 +868,46 @@ void AInv_ProxyMesh::CaptureChange(bool IsDragging)
 --------------------------------------------
 ## InventorySave
 
-// InventoryComp에서 Save,Load한다.
-// 게임의 초기화가 된다음에 해야하기때문에 워크플로를 잘 맞춰야 한다.
+인벤토리의 아이템들을 저장할수 있도록 하기위해서 필요한 작업들을 수행한다.
+
+### Save
+
+인벤토리의 아이템을 저장하는 것으로, 플러그인에서 새롭게 만든 구조체에 저장할 데이터들을 담고 프로젝트에서 사용할 Save에 해당 구조체를 추가해서 사용하게 된다.
+
+```C++
+USTRUCT()
+struct FItemSaveData
+{
+	GENERATED_BODY()
+
+
+	UPROPERTY()
+	int32 StackCount = 0;
+
+	UPROPERTY()
+	int32 ItemIndex = 0;
+
+	UPROPERTY()
+	FInv_ItemManifest ItemManifest = FInv_ItemManifest();
+
+	UPROPERTY()
+	bool bEquipped = false;
+
+};
+
+USTRUCT()
+struct FInventorySaveData
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TArray<FItemSaveData> InventoryItems;
+};
+
+```
+> 해당 구조체를 프로젝트의 Save클래스에 추가해서 저장할수 있도록 만든다.
+
+
+### Load
+
 
