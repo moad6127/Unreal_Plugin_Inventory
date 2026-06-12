@@ -905,7 +905,39 @@ struct FInventorySaveData
 };
 
 ```
-> 해당 구조체를 프로젝트의 Save클래스에 추가해서 저장할수 있도록 만든다.
+> 해당 구조체를 프로젝트의 Save클래스에 추가해서 저장할수 있도록 만든다.      
+> 아이템의 Manifest와 StackCount, 인벤토리의 위치인 Index등을 저장할수 있도록 해당 변수들을 만들어 사용한다.        
+> bEquipped를 통해서 장착된 아이템도 저장하고 Load할때 다시 장착하도록 만들었다.   
+
+
+```C++
+FInventorySaveData UInv_InventoryComponent::SaveInventoryItems() const
+{
+	FInventorySaveData InventorySaveData;
+	for (auto Entry : InventoryList.Entries)
+	{
+		FItemSaveData Data;
+		FInv_ItemManifest ItemManifest = Entry.Item->GetItemManifest();
+		Data.ItemIndex = Entry.Item->GetItemIndex();
+		Data.ItemManifest = ItemManifest;
+		//ItemEquip판정하기
+		if (const FInv_EquipmentFragment* EquipmentFragment = ItemManifest.GetFragmentOfType<FInv_EquipmentFragment>())
+		{
+			Data.bEquipped = EquipmentFragment->bEquipped;
+		}
+		//Item Count저장
+		if (const FInv_StackableFragment* StackableFragment = ItemManifest.GetFragmentOfType<FInv_StackableFragment>())
+		{
+			Data.StackCount = StackableFragment->GetStackCount();
+		}
+
+		InventorySaveData.InventoryItems.Add(Data);
+	}
+	return InventorySaveData;
+}
+```
+> InventoyComponent의 Save함수로 프로젝트에서 해당 함수를 불러서 인벤토리의 데이터를 저장할수 있게 만들었다.       
+> 
 
 
 ### Load
