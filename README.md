@@ -943,3 +943,38 @@ FInventorySaveData UInv_InventoryComponent::SaveInventoryItems() const
 ### Load
 
 
+```C++
+void UInv_InventoryComponent::LoadInventoryItems(const FInventorySaveData& Data)
+{
+	//ClearItemList
+
+	for (const FItemSaveData ItemData : Data.InventoryItems)
+	{
+		RestoreInventoryItem(ItemData);
+	}
+}
+
+void UInv_InventoryComponent::RestoreInventoryItem(const FItemSaveData& ItemData)
+{
+	//
+	UInv_InventoryItem* LoadedItem = NewObject<UInv_InventoryItem>(GetOwner(),UInv_InventoryItem::StaticClass());
+	LoadedItem->SetItemIndex(ItemData.ItemIndex);
+	LoadedItem->SetItemManifest(ItemData.ItemManifest);
+	InventoryList.AddEntry(LoadedItem);
+
+	if (GetOwner()->HasAuthority())
+	{
+		if (ItemData.bEquipped)
+		{
+			OnLoadedItemEquip.Broadcast(LoadedItem);
+		}
+		else
+		{
+			OnLoadedItemAdd.Broadcast(LoadedItem);
+		}
+	}
+}
+```
+
+> 아이템을 다시 Load할때 사용되는 함수이다. 저장된 아이템을 다시 생성한후, 아이템의 정보들을 새로 생성된 아이템에 넣어두게 된다.     
+> 만약 Load된 아이템이 장착된 아이템일 경우 다시 장착하기 위해서 다르게 Broadcast하게 된다.
