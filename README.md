@@ -974,7 +974,51 @@ void UInv_InventoryComponent::RestoreInventoryItem(const FItemSaveData& ItemData
 		}
 	}
 }
+
+void UInv_EquipmentComponent::InitInventoryComponent()
+{
+	...
+	// 초기화가 된후 확인하기위해 사용.
+	if (bIsProxy)
+	{
+		InventoryComponent->SetInitProxyEquipment(true);
+	}
+	else
+	{
+		InventoryComponent->SetInitEquipment(true);
+	}
+
+	if (InventoryComponent->IsProxyEquipmentInit() && InventoryComponent->IsEquipmentInit())
+	{
+		InventoryComponent->SetEquipmentConstructed(true);
+		if (!bIsProxy)
+		{
+			if (InventoryComponent->IsInventoryConstructed())
+			{
+				//만약 Inventory가 초기화가 되었을경우 Load하도록 만들기
+				InventoryComponent->OnInventoryConstruct.Broadcast(InventoryComponent.Get());
+			}
+		}
+	}
+}
+
+void UInv_InventoryComponent::ConstructInventory()
+{
+	...
+	bInventoryConstructed = true;
+	if (bEquipmentConstructed)
+	{
+		OnInventoryConstruct.Broadcast(this);
+	}
+}
 ```
 
 > 아이템을 다시 Load할때 사용되는 함수이다. 저장된 아이템을 다시 생성한후, 아이템의 정보들을 새로 생성된 아이템에 넣어두게 된다.     
-> 만약 Load된 아이템이 장착된 아이템일 경우 다시 장착하기 위해서 다르게 Broadcast하게 된다.
+> 만약 Load된 아이템이 장착된 아이템일 경우 다시 장착하기 위해서 다르게 Broadcast하게 된다.       
+> 또한, 인벤토리가 구성이 된후에 Load가 되어야 하기 때문에 InventoryComponent와 EquipmentComponent가 초기화 되후에 Load될수 있도록 초기화 함수에 각각 변수를 체크할수 있도록 만들어서 초기화가 된후에 Load되도록 만들었다.
+
+```
+Save && Load Sample
+```
+프로젝트에서 사용한 Save와 Load방법이다.    
+다양한 방법으로 Save와 Load할수 있지만 해당 Test프로젝트에서는 SubSystemInstance를 사용해서 Save와 Load를 진행하였다.

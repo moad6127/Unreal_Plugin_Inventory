@@ -92,8 +92,6 @@ void UInv_EquipmentComponent::InitInventoryComponent()
 			}
 		}
 	}
-
-
 }
 
 AInv_EquipActor* UInv_EquipmentComponent::SpawnEquippedActor(FInv_EquipmentFragment* EquipmentFragment, const FInv_ItemManifest& Manifest, USkeletalMeshComponent* AttachMesh)
