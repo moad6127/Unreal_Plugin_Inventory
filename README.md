@@ -1022,3 +1022,71 @@ Save && Load Sample
 ```
 프로젝트에서 사용한 Save와 Load방법이다.    
 다양한 방법으로 Save와 Load할수 있지만 해당 Test프로젝트에서는 SubSystemInstance를 사용해서 Save와 Load를 진행하였다.
+
+```C++
+
+
+void AInv_PlayerController::PrimaryInteract()
+{
+	if (!ThisActor.IsValid())
+	{
+		return;
+	}
+	FInteractionOption Option;
+	Option.Payload = this;
+	TArray<UActorComponent*> Components = ThisActor->GetComponentsByInterface(UInv_InteractInterface::StaticClass());
+	if (!Components.IsEmpty())
+	{
+		// AddItem
+		...
+	}
+	else
+	{
+		if (ThisActor->Implements<UInv_InteractInterface>())
+		{
+			IInv_InteractInterface::Execute_Interact(ThisActor.Get(), Option);
+		}
+	}
+	HandleInteract(Option);
+
+}
+
+void AInv_PlayerController::HandleInteract(const FInteractionOption& Option)
+{
+	switch (Option.Type)
+	{
+	case EInteractionType::Pickup:
+	{
+		...
+	}
+	case EInteractionType::Save:
+	{
+
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+
+bool ASaveActor::Interact_Implementation(FInteractionOption& OutOption)
+{
+	// Save
+	APlayerController* PC = Cast<APlayerController>(OutOption.Payload);
+	UInventorySaveSubSystemInstance* SubSystem = GetGameInstance()->GetSubsystem<UInventorySaveSubSystemInstance>();
+	SubSystem->Save(PC);
+	OutOption.Type = EInteractionType::Save;
+	OutOption.Payload = this;
+	return true;
+}
+
+```
+> 먼저 프로젝트에서 Save를 활성화 시키기위한 Actor를 만들어 두고 Interact하게되면 Save를 진행하도록 만들었다.        
+> Interact를 통합하기위해서 Option을 입력받도록 만들었다.     
+> SaveActor를 Interact하게되면 새롭게 만든 SubSystem을 사용해서 Save가 진행되도록 하였다.
+
+
+```C++
+
+```
