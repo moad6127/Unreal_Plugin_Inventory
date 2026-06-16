@@ -1088,5 +1088,35 @@ bool ASaveActor::Interact_Implementation(FInteractionOption& OutOption)
 
 
 ```C++
+void UInventorySaveSubSystemInstance::Save(APlayerController* PC)
+{
+	int32 SlotIndex = UInv_InventoryStatics::GetInventorySaveSlotIndex();
+	FString SlotName = UInv_InventoryStatics::GetInventorySaveSlotName();
+
+	const USaveSettings* Settings = GetDefault<USaveSettings>();
+	if (!Settings)
+	{
+		return;
+	}
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, SlotIndex))
+	{
+		UGameplayStatics::DeleteGameInSlot(SlotName, SlotIndex);
+	}
+
+	USaveGame* SaveGameObject = UGameplayStatics::CreateSaveGameObject(Settings->SaveClass);
+	CachedSaveData = Cast<UInventorySave>(SaveGameObject);
+	UInv_InventoryComponent* InventoryComp = UInv_InventoryStatics::GetInventoryComponent(PC);
+	if (!IsValid(InventoryComp))
+	{
+		return;
+	}
+	CachedSaveData->InventoryData = InventoryComp->SaveInventoryItems();
+
+	UGameplayStatics::SaveGameToSlot(CachedSaveData, SlotName, SlotIndex);
+}
 
 ```
+
+> SubSystemInstance에서는 이런식으로 Save가 진행되며 InventoryComp에서 SaveData구조체를 받아서 Save클래스에 저장하게 된다.       
+
+
