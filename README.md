@@ -1017,8 +1017,9 @@ void UInv_InventoryComponent::ConstructInventory()
 > 만약 Load된 아이템이 장착된 아이템일 경우 다시 장착하기 위해서 다르게 Broadcast하게 된다.       
 > 또한, 인벤토리가 구성이 된후에 Load가 되어야 하기 때문에 InventoryComponent와 EquipmentComponent가 초기화 되후에 Load될수 있도록 초기화 함수에 각각 변수를 체크할수 있도록 만들어서 초기화가 된후에 Load되도록 만들었다.
 
+
 ```
-Save && Load Sample
+Save Sample
 ```
 프로젝트에서 사용한 Save와 Load방법이다.    
 다양한 방법으로 Save와 Load할수 있지만 해당 Test프로젝트에서는 SubSystemInstance를 사용해서 Save와 Load를 진행하였다.
@@ -1119,4 +1120,13 @@ void UInventorySaveSubSystemInstance::Save(APlayerController* PC)
 
 > SubSystemInstance에서는 이런식으로 Save가 진행되며 InventoryComp에서 SaveData구조체를 받아서 Save클래스에 저장하게 된다.       
 
+```
+Load Sample
+```
+Load는 인벤토리가 초기화가 된후에 되어야 하기때문에 저장된 Save파일을 가져온다음, 인벤토리의 초기화가 끝났을때 Load를 진행하도록 만들었다.
+ 
+
+```C++
+
+```
 
