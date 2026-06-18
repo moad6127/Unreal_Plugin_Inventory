@@ -1123,10 +1123,63 @@ void UInventorySaveSubSystemInstance::Save(APlayerController* PC)
 ```
 Load Sample
 ```
-Load는 인벤토리가 초기화가 된후에 되어야 하기때문에 저장된 Save파일을 가져온다음, 인벤토리의 초기화가 끝났을때 Load를 진행하도록 만들었다.
+Load는 인벤토리가 초기화가 된후에 되어야 하기때문에 먼저 저장된 Save파일을 가져온 다음, 인벤토리의 초기화가 끝났을때 Load를 진행하도록 만들었다.
  
 
 ```C++
+
+void APlugin_InventoryGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UInventorySaveSubSystemInstance* SaveSubSystem = GetGameInstance()->GetSubsystem<UInventorySaveSubSystemInstance>();
+	SaveSubSystem->LoadGame();
+}
+
+
+
+void UInventorySaveSubSystemInstance::LoadGame()
+{
+	int32 SlotIndex = UInv_InventoryStatics::GetInventorySaveSlotIndex();
+	FString SlotName = UInv_InventoryStatics::GetInventorySaveSlotName();
+	
+	const USaveSettings* Settings = GetDefault<USaveSettings>();
+	if (!Settings)
+	{
+		return;
+	}
+	
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, SlotIndex))
+	{
+		CachedSaveData = Cast<UInventorySave>(UGameplayStatics::LoadGameFromSlot(SlotName, SlotIndex));
+	}
+	else
+	{
+		if (Settings->SaveClass)
+		{
+			CachedSaveData = Cast<UInventorySave>(UGameplayStatics::CreateSaveGameObject(Settings->SaveClass));
+			UGameplayStatics::SaveGameToSlot(CachedSaveData, SlotName, SlotIndex);
+		}
+	}
+
+	bLoadCompleted = true;
+
+	for (TWeakObjectPtr<ACharacter> Character : WaitLoadCharacter)
+	{
+		if (Character.IsValid())
+		{
+			ApplyLoadData(Cast<APlayerController>(Character->GetController()));
+		}
+	}
+
+	WaitLoadCharacter.Empty();
+}
+```
+
+> GameMode의 Beginplay에서 Load함수를 호출해 Save파일의 데이터를 먼저 가져온후 SubSystem의 변수로 저장해두게 된다.
+
+```C++
+// InventoryComp에서 초기화가 진행된후에 Load가 호출되도록 만든다.
 
 ```
 
