@@ -1174,12 +1174,79 @@ void UInventorySaveSubSystemInstance::LoadGame()
 
 	WaitLoadCharacter.Empty();
 }
+
+void APlugin_InventoryCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	UInventorySaveSubSystemInstance* SaveSubSystem = GetGameInstance()->GetSubsystem<UInventorySaveSubSystemInstance>();
+	SaveSubSystem->RequestApply(this);
+
+}
+
+void UInventorySaveSubSystemInstance::RequestApply(ACharacter* Character)
+{
+	if (!IsValid(Character))
+	{
+		return;
+	}
+
+	if (bLoadCompleted)
+	{
+		ApplyLoadData(Cast<APlayerController>(Character->GetController()));
+	}
+	else
+	{
+		WaitLoadCharacter.Add(Character);
+	}	
+}
+
 ```
 
 > GameMode의 Beginplay에서 Load함수를 호출해 Save파일의 데이터를 먼저 가져온후 SubSystem의 변수로 저장해두게 된다.
+> Character클래스의 PossessedBy함수에서 Load할 데이터를 불러왔는지 확인후 데이터가 존재할경우 해당 캐릭터를 Load할수 있도록 되어있다.
 
 ```C++
 // InventoryComp에서 초기화가 진행된후에 Load가 호출되도록 만든다.
+void UInv_InventoryComponent::ConstructInventory()
+{
+	...
+	bInventoryConstructed = true;
+	if (bEquipmentConstructed)
+	{
+		OnInventoryConstruct.Broadcast(this);
+	}
+}
+void UInv_EquipmentComponent::InitInventoryComponent()
+{
+	
+	...
+	if (bIsProxy)
+	{
+		InventoryComponent->SetInitProxyEquipment(true);
+	}
+	else
+	{
+		InventoryComponent->SetInitEquipment(true);
+	}
 
+	if (InventoryComponent->IsProxyEquipmentInit() && InventoryComponent->IsEquipmentInit())
+	{
+		InventoryComponent->SetEquipmentConstructed(true);
+		if (!bIsProxy)
+		{
+			if (InventoryComponent->IsInventoryConstructed())
+			{
+				InventoryComponent->OnInventoryConstruct.Broadcast(InventoryComponent.Get());
+			}
+		}
+	}
+}
 ```
 
+> InventoryComponent와 EquipmentComponent의 초기화가 완료될때 델리게이트를 통해서 두가지 전부 초기화가 되었을경우 Broadcast하도록 만들었다.
+
+```C++
+// 전부 초기화가 되었을때 Load함수 호출하기
+
+```
