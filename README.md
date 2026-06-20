@@ -1248,5 +1248,68 @@ void UInv_EquipmentComponent::InitInventoryComponent()
 
 ```C++
 // 전부 초기화가 되었을때 Load함수 호출하기
+void UInventorySaveSubSystemInstance::ApplyLoadData(APlayerController* PC)
+{
+	UInv_InventoryComponent* InventoryComp = UInv_InventoryStatics::GetInventoryComponent(PC);
+	if (!IsValid(InventoryComp))
+	{
+		return;
+	}
+	if (!IsValid(CachedSaveData))
+	{
+		return;
+	}
+	if (InventoryComp->IsInventoryConstructed() && InventoryComp->IsEquipmentConstructed())
+	{
+		InventoryComp->LoadInventoryItems(CachedSaveData->InventoryData);
+	}
+	else
+	{
+		InventoryComp->OnInventoryConstruct.AddDynamic(this, &UInventorySaveSubSystemInstance::HandleInventoryCompConstruct);
+	}
+}
+void UInventorySaveSubSystemInstance::HandleInventoryCompConstruct(UInv_InventoryComponent* InventoryComp)
+{
 
+	if (IsValid(InventoryComp) && IsValid(CachedSaveData))
+	{
+		InventoryComp->LoadInventoryItems(CachedSaveData->InventoryData);
+	}
+}
+
+```
+> InventoryComp와 EquipmentComp가 전부 초기화 되었다고 확인되면 SubSystemInstance에서 InventoryComp에서 Load함수를 호출하게 되고, Load가 진행되게 된다.
+
+
+```C++
+void UInv_InventoryComponent::LoadInventoryItems(const FInventorySaveData& Data)
+{
+	//ClearItemList
+
+	for (const FItemSaveData ItemData : Data.InventoryItems)
+	{
+		RestoreInventoryItem(ItemData);
+	}
+}
+
+void UInv_InventoryComponent::RestoreInventoryItem(const FItemSaveData& ItemData)
+{
+	// 
+	UInv_InventoryItem* LoadedItem = NewObject<UInv_InventoryItem>(GetOwner(),UInv_InventoryItem::StaticClass());
+	LoadedItem->SetItemIndex(ItemData.ItemIndex);
+	LoadedItem->SetItemManifest(ItemData.ItemManifest);
+	InventoryList.AddEntry(LoadedItem);
+
+	if (GetOwner()->HasAuthority())
+	{
+		if (ItemData.bEquipped)
+		{
+			OnLoadedItemEquip.Broadcast(LoadedItem);
+		}
+		else
+		{
+			OnLoadedItemAdd.Broadcast(LoadedItem);
+		}
+	}
+}
 ```
