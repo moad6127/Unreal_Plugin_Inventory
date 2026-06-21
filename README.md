@@ -1279,37 +1279,5 @@ void UInventorySaveSubSystemInstance::HandleInventoryCompConstruct(UInv_Inventor
 
 ```
 > InventoryComp와 EquipmentComp가 전부 초기화 되었다고 확인되면 SubSystemInstance에서 InventoryComp에서 Load함수를 호출하게 되고, Load가 진행되게 된다.
+s
 
-
-```C++
-void UInv_InventoryComponent::LoadInventoryItems(const FInventorySaveData& Data)
-{
-	//ClearItemList
-
-	for (const FItemSaveData ItemData : Data.InventoryItems)
-	{
-		RestoreInventoryItem(ItemData);
-	}
-}
-
-void UInv_InventoryComponent::RestoreInventoryItem(const FItemSaveData& ItemData)
-{
-	// 
-	UInv_InventoryItem* LoadedItem = NewObject<UInv_InventoryItem>(GetOwner(),UInv_InventoryItem::StaticClass());
-	LoadedItem->SetItemIndex(ItemData.ItemIndex);
-	LoadedItem->SetItemManifest(ItemData.ItemManifest);
-	InventoryList.AddEntry(LoadedItem);
-
-	if (GetOwner()->HasAuthority())
-	{
-		if (ItemData.bEquipped)
-		{
-			OnLoadedItemEquip.Broadcast(LoadedItem);
-		}
-		else
-		{
-			OnLoadedItemAdd.Broadcast(LoadedItem);
-		}
-	}
-}
-```
